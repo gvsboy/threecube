@@ -1,6 +1,20 @@
+$text-color: #fff;
+$panel-bg: #ccc;
+$panel-border-color: #006699;
+$panel-gutter: 0.4em;
+
+@mixin panel-border() {
+  color: #fff;
+  padding: $panel-gutter;
+  background-color: $panel-bg;
+  border: 0.2em solid $panel-border-color;
+  border-radius: $panel-gutter;
+}
+
 body {
   margin: 0;
   padding: 0;
+  font-family: calibri;
 }
 
 canvas {
@@ -8,11 +22,39 @@ canvas {
   height: 100%;
 };
 
-ul {
+#factory {
   position: absolute;
   top: 1em;
   left: 1em;
   margin: 0;
   padding: 0;
+  width: 8em;
   list-style-type: none;
+
+  button {
+    width: 100%;
+    color: $text-color;
+    padding: $panel-gutter;
+    background: none;
+    border: none;
+    border-left: 0.2em solid $text-color;
+    text-align: left;
+    cursor: pointer;
+    transition: border 0.1s;
+
+    &:hover {
+      border-left: 1em solid $text-color;
+    }
+
+    &.selected {
+      @include panel-border();
+    }
+  }
+}
+
+#properties {
+  @include panel-border();
+  position: absolute;
+  top: 1em;
+  left: 8em;
 }

@@ -27,6 +27,14 @@ var factories = {
     return new _THREE2['default'].Mesh(new _THREE2['default'].SphereGeometry(1, 32, 32), new _THREE2['default'].MeshLambertMaterial({ color: 65280 }));
   },
 
+  cylinder: function cylinder() {
+    return new _THREE2['default'].Mesh(new _THREE2['default'].CylinderGeometry(1, 1, 3, 32), new _THREE2['default'].MeshLambertMaterial({ color: 65280 }));
+  },
+
+  circle: function circle() {
+    return new _THREE2['default'].Mesh(new _THREE2['default'].CircleGeometry(1, 32), new _THREE2['default'].MeshLambertMaterial({ color: 65280 }));
+  },
+
   pointLight: function pointLight() {
     var light = new _THREE2['default'].PointLight(16777215);
     light.position.x = 0;
@@ -79,10 +87,10 @@ var getLabel = function getLabel(evt) {
  * Fancy-schmancy render loop creator. Well, not **too** fancy anyways.
  * Not sure about the best way to handle this in FP, or in a pure way.
  * This is fine for now.
- * @param  {Scene} scene A THREE.js Scene object.
- * @param  {Camera} camera A THREE.js Camera object.
- * @param  {Renderer} renderer A THREE.js renderer.
- * @param  {Function} getter A method for retrieving the main object.
+ * @param {Scene} scene A THREE.js Scene object.
+ * @param {Camera} camera A THREE.js Camera object.
+ * @param {Renderer} renderer A THREE.js renderer.
+ * @param {Function} getter A method for retrieving the main object.
  */
 function startRenderLoop(scene, camera, renderer, getter) {
   (function loop() {
@@ -101,7 +109,8 @@ var WIDTH = window.innerWidth,
     HEIGHT = window.innerHeight,
 
 // This is what we'll call the shape being rendered.
-MAIN_OBJECT = 'mainObject',
+OBJECT_NAME = 'mainObject',
+    DEFAULT_OBJECT = 'cube',
 
 // The three things needed to render a scene:
 scene = new _THREE2['default'].Scene(),
@@ -119,31 +128,33 @@ document.body.appendChild(renderer.domElement);
 var addObjectByLabel = _import2['default'].flowRight(addObject(scene), createObjectByLabel(factories), getLabel);
 
 // Adds an object and sets the name as 'main'.
-var addAndNameObjectByLabel = _import2['default'].flowRight(nameObject(MAIN_OBJECT), addObjectByLabel);
+var addAndNameObjectByLabel = _import2['default'].flowRight(nameObject(OBJECT_NAME), addObjectByLabel);
 
 // Remove an object by name;
 var removeObjectByName = _import2['default'].flowRight(removeObject(scene), getObjectByName);
 
 // Retrieve the main object from the scene.
-var getMainObject = _import2['default'].partial(getObjectByName, scene, MAIN_OBJECT);
+var getMainObject = _import2['default'].partial(getObjectByName, scene, OBJECT_NAME);
 
 // Jank, but I'm not sure how to do better yet. The click handler
 // for swapping out the main object with a new one.
 var swapObjectOnClick = _import2['default'].flowRight(addAndNameObjectByLabel, function (evt) {
-  removeObjectByName(scene, MAIN_OBJECT);
+  removeObjectByName(scene, OBJECT_NAME);
   return evt;
 });
 
+var test = createObjectByLabel(factories, 'cube');
+
 // Listen for button clicks.
-window.document.getElementById('list-actions').addEventListener('click', swapObjectOnClick);
+window.document.getElementById('factory').addEventListener('click', swapObjectOnClick);
 
 // Shed some light on the subject.
 addObjectByLabel('pointLight');
 
 // Create the default shape.
-addAndNameObjectByLabel('cube');
+addAndNameObjectByLabel(DEFAULT_OBJECT);
 
 // Start rendering that shiz!
-startRenderLoop(scene, camera, renderer, getMainObject);
+//startRenderLoop(scene, camera, renderer, getMainObject);
 
 },{"lodash":"lodash","three":"three"}]},{},[1]);

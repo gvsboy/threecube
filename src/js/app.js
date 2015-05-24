@@ -23,6 +23,20 @@ var factories = {
     );
   },
 
+  cylinder: () => {
+    return new THREE.Mesh(
+      new THREE.CylinderGeometry(1, 1, 3, 32),
+      new THREE.MeshLambertMaterial({color: 0x00ff00})
+    )
+  },
+
+  circle: () => {
+    return new THREE.Mesh(
+      new THREE.CircleGeometry(1, 32),
+      new THREE.MeshLambertMaterial({color: 0x00ff00})
+    );
+  },
+
   pointLight: () => {
     var light = new THREE.PointLight(0xffffff);
     light.position.x = 0;
@@ -75,10 +89,10 @@ var getLabel = evt => {
  * Fancy-schmancy render loop creator. Well, not **too** fancy anyways.
  * Not sure about the best way to handle this in FP, or in a pure way.
  * This is fine for now.
- * @param  {Scene} scene A THREE.js Scene object.
- * @param  {Camera} camera A THREE.js Camera object.
- * @param  {Renderer} renderer A THREE.js renderer.
- * @param  {Function} getter A method for retrieving the main object.
+ * @param {Scene} scene A THREE.js Scene object.
+ * @param {Camera} camera A THREE.js Camera object.
+ * @param {Renderer} renderer A THREE.js renderer.
+ * @param {Function} getter A method for retrieving the main object.
  */
 function startRenderLoop(scene, camera, renderer, getter) {
   (function loop() {
@@ -99,7 +113,8 @@ var WIDTH = window.innerWidth,
     HEIGHT = window.innerHeight,
 
     // This is what we'll call the shape being rendered.
-    MAIN_OBJECT = 'mainObject',
+    OBJECT_NAME = 'mainObject',
+    DEFAULT_OBJECT = 'cube',
 
     // The three things needed to render a scene:
     scene = new THREE.Scene(),
@@ -119,31 +134,33 @@ document.body.appendChild(renderer.domElement);
 var addObjectByLabel = _.flowRight(addObject(scene), createObjectByLabel(factories), getLabel);
 
 // Adds an object and sets the name as 'main'.
-var addAndNameObjectByLabel = _.flowRight(nameObject(MAIN_OBJECT), addObjectByLabel);
+var addAndNameObjectByLabel = _.flowRight(nameObject(OBJECT_NAME), addObjectByLabel);
 
 // Remove an object by name;
 var removeObjectByName = _.flowRight(removeObject(scene), getObjectByName);
 
 // Retrieve the main object from the scene.
-var getMainObject = _.partial(getObjectByName, scene, MAIN_OBJECT);
+var getMainObject = _.partial(getObjectByName, scene, OBJECT_NAME);
 
 // Jank, but I'm not sure how to do better yet. The click handler
 // for swapping out the main object with a new one.
 var swapObjectOnClick = _.flowRight(addAndNameObjectByLabel, evt => {
-  removeObjectByName(scene, MAIN_OBJECT);
+  removeObjectByName(scene, OBJECT_NAME);
   return evt;
 });
 
+var test = createObjectByLabel(factories, 'cube');
+
 // Listen for button clicks.
 window.document
-  .getElementById('list-actions')
+  .getElementById('factory')
   .addEventListener('click', swapObjectOnClick);
 
 // Shed some light on the subject.
 addObjectByLabel('pointLight');
 
 // Create the default shape.
-addAndNameObjectByLabel('cube');
+addAndNameObjectByLabel(DEFAULT_OBJECT);
 
 // Start rendering that shiz!
 startRenderLoop(scene, camera, renderer, getMainObject);

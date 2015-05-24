@@ -80,14 +80,20 @@ gulp.task('dev', function() {
       .pipe(livereload());
   }
 
+  function copyHTML() {
+    gulp
+      .src('src/html/index.dev.html')
+      .pipe(rename('index.html'))
+      .pipe(gulp.dest(DEV_DIR))
+      .pipe(livereload());
+  }
+
   // Copy over the index file. Nothing fancy.
-  gulp
-    .src('src/html/index.dev.html')
-    .pipe(rename('index.html'))
-    .pipe(gulp.dest(DEV_DIR));
+  
 
   //Watch for SCSS changes and reload.
   gulp.watch('src/scss/*.scss', compileSASS);
+  gulp.watch('src/html/*.html', copyHTML);
 
   // Boot the livereload server.
   livereload.listen();
@@ -95,6 +101,7 @@ gulp.task('dev', function() {
   // Execute an initial compile.
   compileJS();
   compileSASS();
+  copyHTML();
 });
 
 gulp.task('prod-libs', function() {
