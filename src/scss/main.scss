@@ -1,15 +1,5 @@
 $text-color: #fff;
-$panel-bg: #ccc;
-$panel-border-color: #006699;
 $panel-gutter: 0.4em;
-
-@mixin panel-border() {
-  color: #fff;
-  padding: $panel-gutter;
-  background-color: $panel-bg;
-  border: 0.2em solid $panel-border-color;
-  border-radius: $panel-gutter;
-}
 
 body {
   margin: 0;
@@ -20,7 +10,13 @@ body {
 canvas {
   width: 100%;
   height: 100%;
-};
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
 
 #factory {
   position: absolute;
@@ -29,7 +25,11 @@ canvas {
   margin: 0;
   padding: 0;
   width: 8em;
-  list-style-type: none;
+  z-index: 10;
+
+  li {
+    position: relative;
+  }
 
   button {
     width: 100%;
@@ -45,16 +45,31 @@ canvas {
     &:hover {
       border-left: 1em solid $text-color;
     }
+  }
 
-    &.selected {
-      @include panel-border();
-    }
+  .selected .factory {
+    border-left: 1em solid $text-color;
+  }
+
+  .panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    overflow: hidden;
+    transition: width 0.4s;
+  }
+
+  .selected .panel {
+    width: 26em;
+    height: 26em;
   }
 }
 
 #properties {
-  @include panel-border();
   position: absolute;
-  top: 1em;
-  left: 8em;
+  width: 18em;
+  padding-left: 8em;
+  border-top: 0.2em solid $text-color;
+  color: $text-color;
 }

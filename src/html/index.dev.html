@@ -11,18 +11,51 @@
   <body>
 
     <ul id="factory">
-      <li><button class="cube">Cube</button></li>
-      <li><button class="sphere">Sphere</button></li>
-      <li><button class="cylinder">Cylinder</button></li>
-      <li><button class="circle">Circle</button></li>
+
+      <li>
+        <button class="cube factory">Cube</button>
+        <div class="panel">
+
+          <div id="properties">
+            <button class="reset">Reset Shape to Defaults</button>
+
+            <!-- Inputs used for the material instance -->
+            <ul id="material">
+              <li>
+                <label for="input-color">Color</label>
+                <input id="input-color" type="color" value="#00ff00">
+              </li>
+            </ul>
+
+            <!-- Arguments used in creating the geometry instance, in order -->
+            <ul id="geometry">
+              <li>
+                <label for="input-width">Width</label>
+                <input id="input-width" type="range" min="1" max="10" step="1" value="1">
+                <output for="input-width" id="output-width">1</output>
+              </li>
+            </ul>
+
+          </div>
+
+        </div>
+      </li>
+
+      <li>
+        <button class="sphere factory">Sphere</button>
+        <div class="panel"></div>
+      </li>
+      <li>
+        <button class="cylinder factory">Cylinder</button>
+        <div class="panel"></div>
+      </li>
+      <li>
+        <button class="circle factory">Circle</button>
+        <div class="panel"></div>
+      </li>
     </ul>
 
-    <div id="properties">
-      <button class="reset">Reset Shape to Defaults</button>
-      <hr>
-      <label for="input-color">Color:</label>
-      <input id="input-color" type="color" value="#00ff00">
-    </div>
+    
 
     <script src="libs.js"></script>
     <script src="main.js"></script>

@@ -7,6 +7,11 @@ canvas {
   width: 100%;
   height: 100%; }
 
+ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none; }
+
 #factory {
   position: absolute;
   top: 1em;
@@ -14,7 +19,9 @@ canvas {
   margin: 0;
   padding: 0;
   width: 8em;
-  list-style-type: none; }
+  z-index: 10; }
+  #factory li {
+    position: relative; }
   #factory button {
     width: 100%;
     color: #fff;
@@ -27,19 +34,22 @@ canvas {
     transition: border 0.1s; }
     #factory button:hover {
       border-left: 1em solid #fff; }
-    #factory button.selected {
-      color: #fff;
-      padding: 0.4em;
-      background-color: #ccc;
-      border: 0.2em solid #006699;
-      border-radius: 0.4em; }
+  #factory .selected .factory {
+    border-left: 1em solid #fff; }
+  #factory .panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    overflow: hidden;
+    transition: width 0.4s; }
+  #factory .selected .panel {
+    width: 26em;
+    height: 26em; }
 
 #properties {
-  color: #fff;
-  padding: 0.4em;
-  background-color: #ccc;
-  border: 0.2em solid #006699;
-  border-radius: 0.4em;
   position: absolute;
-  top: 1em;
-  left: 8em; }
+  width: 18em;
+  padding-left: 8em;
+  border-top: 0.2em solid #fff;
+  color: #fff; }

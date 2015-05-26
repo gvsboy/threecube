@@ -47,7 +47,14 @@ var factories = {
 
 };
 
+// Troubleshooting.
+var trace = _.curry((tag, x) => {
+  console.log(tag, x);
+  return x;
+});
+
 // Wrapping the scene object addition method.
+// But I guess this isn't pure because we're mutating the scene, right? Eh.
 var addObject = _.curry((scene, object) => {
   if (object) {
     scene.add(object);
@@ -82,7 +89,7 @@ var createObjectByLabel = _.curry((factories, label) => {
 // A little method for extracting factory labels (classes) from events.
 // If the input is not an object, return it.
 var getLabel = evt => {
-  return _.isObject(evt) ? evt.target.className : evt;
+  return _.isObject(evt) ? evt.target.className.split(' ')[0] : evt;
 };
 
 /**
@@ -106,6 +113,53 @@ function startRenderLoop(scene, camera, renderer, getter) {
   }());
 }
 
+
+/**
+ * START THE BUSTED STUFF ==========================================================================================
+ */
+
+function horribleDOMMutationOnClick(evt) {
+
+  var SELECTED_CLASS = 'selected',
+      selected = document.getElementsByClassName(SELECTED_CLASS)[0],
+      properties = document.getElementById('properties'),
+      target = evt.target.parentNode;
+
+  // Right now, bail if it's not a factory button.
+  if (!evt.target.classList.contains('factory')) {
+    return;
+  }
+
+  // If there's a selected option, deselect it.
+  if (selected) {
+    selected.classList.remove(SELECTED_CLASS);
+  }
+
+  // Set the target element as selected.
+  target.classList.add(SELECTED_CLASS);
+
+  // Align the properties box with the selected button.
+  target.querySelector('.panel').appendChild(properties);
+
+  // Remove the previous object from the scene.
+  removeObjectByName(scene, OBJECT_NAME);
+
+  // Pass the event object along.
+  return evt;
+}
+
+function updateObjectOnInput(evt) {
+
+  console.log(evt.target.value);
+  var box = new THREE.BoxGeometry();
+  console.log(box);
+}
+
+
+
+/**
+ * END THE BUSTED STUFF ==========================================================================================
+ */
 
 
 // Some crap:
@@ -144,17 +198,13 @@ var getMainObject = _.partial(getObjectByName, scene, OBJECT_NAME);
 
 // Jank, but I'm not sure how to do better yet. The click handler
 // for swapping out the main object with a new one.
-var swapObjectOnClick = _.flowRight(addAndNameObjectByLabel, evt => {
-  removeObjectByName(scene, OBJECT_NAME);
-  return evt;
-});
-
-var test = createObjectByLabel(factories, 'cube');
+var swapObjectOnClick = _.flowRight(addAndNameObjectByLabel, horribleDOMMutationOnClick);
 
 // Listen for button clicks.
-window.document
-  .getElementById('factory')
-  .addEventListener('click', swapObjectOnClick);
+var factoryEl = window.document.getElementById('factory')
+factoryEl.addEventListener('click', swapObjectOnClick);
+// let's throttle this bad boy.
+factoryEl.addEventListener('input', _.debounce(updateObjectOnInput, 100));
 
 // Shed some light on the subject.
 addObjectByLabel('pointLight');
