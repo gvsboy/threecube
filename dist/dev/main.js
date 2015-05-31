@@ -16,34 +16,7 @@ var _import = require('lodash');
 
 var _import2 = _interopRequireDefault(_import);
 
-// An object containing all our object factory methods.
-var factories = {
-
-  cube: function cube() {
-    return new _THREE2['default'].Mesh(new _THREE2['default'].BoxGeometry(1, 1, 1), new _THREE2['default'].MeshLambertMaterial({ color: 65280 }));
-  },
-
-  sphere: function sphere() {
-    return new _THREE2['default'].Mesh(new _THREE2['default'].SphereGeometry(1, 32, 32), new _THREE2['default'].MeshLambertMaterial({ color: 65280 }));
-  },
-
-  cylinder: function cylinder() {
-    return new _THREE2['default'].Mesh(new _THREE2['default'].CylinderGeometry(1, 1, 3, 32), new _THREE2['default'].MeshLambertMaterial({ color: 65280 }));
-  },
-
-  circle: function circle() {
-    return new _THREE2['default'].Mesh(new _THREE2['default'].CircleGeometry(1, 32), new _THREE2['default'].MeshLambertMaterial({ color: 65280 }));
-  },
-
-  pointLight: function pointLight() {
-    var light = new _THREE2['default'].PointLight(16777215);
-    light.position.x = 0;
-    light.position.y = 10;
-    light.position.z = 100;
-    return light;
-  }
-
-};
+var _createObjectByLabel = require('./factory');
 
 // Troubleshooting.
 var trace = _import2['default'].curry(function (tag, x) {
@@ -78,16 +51,10 @@ var nameObject = _import2['default'].curry(function (name, object) {
   return object;
 });
 
-// Find a factory method by label and attempt to create an object instance.
-var createObjectByLabel = _import2['default'].curry(function (factories, label) {
-  var factory = factories[label];
-  return _import2['default'].isFunction(factory) && factory();
-});
-
 // A little method for extracting factory labels (classes) from events.
 // If the input is not an object, return it.
 var getLabel = function getLabel(evt) {
-  return _import2['default'].isObject(evt) ? evt.target.className.split(' ')[0] : evt;
+  return _import2['default'].isObject(evt) ? _import2['default'].capitalize(_import2['default'].camelCase(evt.target.className.split(' ')[0])) : evt;
 };
 
 /**
@@ -146,10 +113,7 @@ function horribleDOMMutationOnClick(evt) {
 }
 
 function updateObjectOnInput(evt) {
-
   console.log(evt.target.value);
-  var box = new _THREE2['default'].BoxGeometry();
-  console.log(box);
 }
 
 /**
@@ -162,7 +126,7 @@ var WIDTH = window.innerWidth,
 
 // This is what we'll call the shape being rendered.
 OBJECT_NAME = 'mainObject',
-    DEFAULT_OBJECT = 'cube',
+    DEFAULT_OBJECT = 'BoxGeometry',
 
 // The three things needed to render a scene:
 scene = new _THREE2['default'].Scene(),
@@ -177,7 +141,7 @@ document.body.appendChild(renderer.domElement);
 // OK LET'S HAVE FUN.
 
 // Generic object adding method.
-var addObjectByLabel = _import2['default'].flowRight(addObject(scene), createObjectByLabel(factories), getLabel);
+var addObjectByLabel = _import2['default'].flowRight(addObject(scene), _createObjectByLabel.createObjectByLabel, getLabel);
 
 // Adds an object and sets the name as 'main'.
 var addAndNameObjectByLabel = _import2['default'].flowRight(nameObject(OBJECT_NAME), addObjectByLabel);
@@ -199,7 +163,11 @@ factoryEl.addEventListener('click', swapObjectOnClick);
 factoryEl.addEventListener('input', _import2['default'].debounce(updateObjectOnInput, 100));
 
 // Shed some light on the subject.
-addObjectByLabel('pointLight');
+var light = light = new _THREE2['default'].PointLight(16777215);
+light.position.x = 0;
+light.position.y = 10;
+light.position.z = 100;
+addObject(scene, light);
 
 // Create the default shape.
 addAndNameObjectByLabel(DEFAULT_OBJECT);
@@ -207,4 +175,190 @@ addAndNameObjectByLabel(DEFAULT_OBJECT);
 // Start rendering that shiz!
 startRenderLoop(scene, camera, renderer, getMainObject);
 
-},{"lodash":"lodash","three":"three"}]},{},[1]);
+},{"./factory":3,"lodash":"lodash","three":"three"}],2:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+var _import = require('lodash');
+
+var _import2 = _interopRequireDefault(_import);
+
+var data = {
+
+  BoxGeometry: [{
+    name: 'width'
+  }, {
+    name: 'height'
+  }, {
+    name: 'depth'
+  }, {
+    name: 'widthSegments'
+  }, {
+    name: 'heightSegments'
+  }, {
+    name: 'depthSegments'
+  }],
+
+  SphereGeometry: [{
+    name: 'radius'
+  }, {
+    name: 'widthSegments'
+  }, {
+    name: 'heightSegments'
+  }, {
+    name: 'phiStart'
+  }, {
+    name: 'phiLength'
+  }, {
+    name: 'thetaStart'
+  }, {
+    name: 'thetaLength'
+  }],
+
+  CylinderGeometry: [{
+    name: 'radiusTop'
+  }, {
+    name: 'radiusBottom'
+  }, {
+    name: 'height'
+  }, {
+    name: 'radiusSegments'
+  }, {
+    name: 'heightSegments'
+  }, {
+    name: 'openEnded'
+  }, {
+    name: 'thetaStart'
+  }, {
+    name: 'thetaLength'
+  }],
+
+  CircleGeometry: [{
+    name: 'radius'
+  }, {
+    name: 'segments'
+  }, {
+    name: 'thetaStart'
+  }, {
+    name: 'thetaLength'
+  }],
+
+  PointLight: [{
+    name: 'hex',
+    value: 16777215
+  }]
+
+};
+
+var defaults = {
+  value: 1,
+  min: 1,
+  max: 10
+};
+
+// Nerd alert.
+//var map = _.rearg(_.curry(_.map, 2), [1, 0]);
+var map = _import2['default'](_import2['default'].map).rearg([1, 0]).curry(2).value();
+
+var getDataByLabel = _import2['default'].curry(function (data, label) {
+  return data[label];
+});
+
+var getParameterByNameOrDefault = _import2['default'].curry(function (defaults, name, param) {
+  return param[name] || defaults[name];
+});
+
+var getValueParameter = getParameterByNameOrDefault(defaults, 'value');
+
+var getDefaultValuesByLabel = _import2['default'].flowRight(map(getValueParameter), getDataByLabel(data));
+exports.getDefaultValuesByLabel = getDefaultValuesByLabel;
+
+},{"lodash":"lodash"}],3:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+var _THREE = require('three');
+
+var _THREE2 = _interopRequireDefault(_THREE);
+
+var _import = require('lodash');
+
+var _import2 = _interopRequireDefault(_import);
+
+var _getDefaultValuesByLabel = require('./data');
+
+function generateInstance(constructor, args) {
+  function F() {
+    return constructor.apply(this, args);
+  }
+  F.prototype = constructor.prototype;
+  return new F();
+}
+
+function getConstructorFromLabel(label) {
+  return _THREE2['default'][label];
+}
+
+/*
+var generateObject = _.curry((constructorGetterFromLabel, generator) => {
+  return function(label, args) {
+    return generator(constructorGetterFromLabel(label), args);
+  };
+});
+*/
+
+//var generateObjectInstance = generateObject(generateInstance);
+
+//var generateGeometry = generateObjectInstance(getGeometryConstructorFromLabel);
+
+// Basic mesh material.
+var mesh = new _THREE2['default'].MeshLambertMaterial({ color: 65280 });
+
+var factories = {
+
+  boxGeometry: function boxGeometry() {
+    return new _THREE2['default'].Mesh(generateInstance(_THREE2['default'].BoxGeometry, [1, 1, 1]), mesh);
+  },
+
+  sphere: function sphere() {
+    return new _THREE2['default'].Mesh(generateInstance(_THREE2['default'].SphereGeometry, [1, 32, 32]), mesh);
+  },
+
+  cylinder: function cylinder() {
+    return new _THREE2['default'].Mesh(generateInstance(_THREE2['default'].CylinderGeometry, [1, 1, 3, 32]), mesh);
+  },
+
+  circle: function circle() {
+    return new _THREE2['default'].Mesh(generateInstance(_THREE2['default'].CircleGeometry, [1, 32]), mesh);
+  },
+
+  pointLight: function pointLight() {
+    return new _THREE2['default'].PointLight(16777215);
+  }
+
+};
+
+// Find a factory method by label and attempt to create an object instance.
+var createObjectFromFactoryByLabel = _import2['default'].curry(function (factories, label) {
+  var factory = factories[_import2['default'].camelCase(label)];
+  return _import2['default'].isFunction(factory) && factory();
+});
+
+//export var createObjectByLabel = createObjectFromFactoryByLabel(factories);
+
+var createObjectByLabel = function createObjectByLabel(label) {
+  return new _THREE2['default'].Mesh(generateInstance(getConstructorFromLabel(label), _getDefaultValuesByLabel.getDefaultValuesByLabel(label)), mesh);
+};
+exports.createObjectByLabel = createObjectByLabel;
+
+},{"./data":2,"lodash":"lodash","three":"three"}]},{},[1]);

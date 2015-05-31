@@ -5,47 +5,7 @@
 
 import THREE from 'three';
 import _ from 'lodash';
-
-// An object containing all our object factory methods.
-var factories = {
-
-  cube: () => {
-    return new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshLambertMaterial({color: 0x00ff00})
-    );
-  },
-
-  sphere: () => {
-    return new THREE.Mesh(
-      new THREE.SphereGeometry(1, 32, 32),
-      new THREE.MeshLambertMaterial({color: 0x00ff00})
-    );
-  },
-
-  cylinder: () => {
-    return new THREE.Mesh(
-      new THREE.CylinderGeometry(1, 1, 3, 32),
-      new THREE.MeshLambertMaterial({color: 0x00ff00})
-    )
-  },
-
-  circle: () => {
-    return new THREE.Mesh(
-      new THREE.CircleGeometry(1, 32),
-      new THREE.MeshLambertMaterial({color: 0x00ff00})
-    );
-  },
-
-  pointLight: () => {
-    var light = new THREE.PointLight(0xffffff);
-    light.position.x = 0;
-    light.position.y = 10;
-    light.position.z = 100;
-    return light;
-  }
-
-};
+import {createObjectByLabel} from './factory';
 
 // Troubleshooting.
 var trace = _.curry((tag, x) => {
@@ -80,16 +40,10 @@ var nameObject = _.curry((name, object) => {
   return object;
 });
 
-// Find a factory method by label and attempt to create an object instance.
-var createObjectByLabel = _.curry((factories, label) => {
-  var factory = factories[label];
-  return _.isFunction(factory) && factory();
-});
-
 // A little method for extracting factory labels (classes) from events.
 // If the input is not an object, return it.
 var getLabel = evt => {
-  return _.isObject(evt) ? evt.target.className.split(' ')[0] : evt;
+  return _.isObject(evt) ? _.capitalize(_.camelCase(evt.target.className.split(' ')[0])) : evt;
 };
 
 /**
@@ -149,10 +103,7 @@ function horribleDOMMutationOnClick(evt) {
 }
 
 function updateObjectOnInput(evt) {
-
   console.log(evt.target.value);
-  var box = new THREE.BoxGeometry();
-  console.log(box);
 }
 
 
@@ -168,7 +119,7 @@ var WIDTH = window.innerWidth,
 
     // This is what we'll call the shape being rendered.
     OBJECT_NAME = 'mainObject',
-    DEFAULT_OBJECT = 'cube',
+    DEFAULT_OBJECT = 'BoxGeometry',
 
     // The three things needed to render a scene:
     scene = new THREE.Scene(),
@@ -185,7 +136,7 @@ document.body.appendChild(renderer.domElement);
 // OK LET'S HAVE FUN.
 
 // Generic object adding method.
-var addObjectByLabel = _.flowRight(addObject(scene), createObjectByLabel(factories), getLabel);
+var addObjectByLabel = _.flowRight(addObject(scene), createObjectByLabel, getLabel);
 
 // Adds an object and sets the name as 'main'.
 var addAndNameObjectByLabel = _.flowRight(nameObject(OBJECT_NAME), addObjectByLabel);
@@ -207,7 +158,11 @@ factoryEl.addEventListener('click', swapObjectOnClick);
 factoryEl.addEventListener('input', _.debounce(updateObjectOnInput, 100));
 
 // Shed some light on the subject.
-addObjectByLabel('pointLight');
+var light = light = new THREE.PointLight(0xffffff);
+light.position.x = 0;
+light.position.y = 10;
+light.position.z = 100;
+addObject(scene, light);
 
 // Create the default shape.
 addAndNameObjectByLabel(DEFAULT_OBJECT);
