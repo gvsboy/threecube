@@ -12,7 +12,7 @@ ul {
   padding: 0;
   list-style-type: none; }
 
-#factory {
+#objects {
   position: absolute;
   top: 1em;
   left: 1em;
@@ -20,9 +20,9 @@ ul {
   padding: 0;
   width: 8em;
   z-index: 10; }
-  #factory li {
+  #objects li {
     position: relative; }
-  #factory button {
+  #objects button {
     width: 100%;
     color: #fff;
     padding: 0.4em;
@@ -32,18 +32,18 @@ ul {
     text-align: left;
     cursor: pointer;
     transition: border 0.1s; }
-    #factory button:hover {
+    #objects button:hover {
       border-left: 1em solid #fff; }
-  #factory .selected .factory {
+  #objects .selected .factory {
     border-left: 1em solid #fff; }
-  #factory .panel {
+  #objects .panel {
     position: absolute;
     top: 0;
     left: 0;
     width: 0;
     overflow: hidden;
     transition: width 0.4s; }
-  #factory .selected .panel {
+  #objects .selected .panel {
     width: 26em;
     height: 26em; }
 

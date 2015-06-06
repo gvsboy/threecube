@@ -28,22 +28,28 @@ var data = {
       name: 'radius'
     },
     {
-      name: 'widthSegments'
+      name: 'widthSegments',
+      value: 32
     },
     {
-      name: 'heightSegments'
+      name: 'heightSegments',
+      value: 32
     },
     {
-      name: 'phiStart'
+      name: 'phiStart',
+      value: 0
     },
     {
-      name: 'phiLength'
+      name: 'phiLength',
+      value: Math.PI * 2
     },
     {
-      name: 'thetaStart'
+      name: 'thetaStart',
+      value: 0
     },
     {
-      name: 'thetaLength'
+      name: 'thetaLength',
+      value: Math.PI
     }
   ],
 
@@ -55,22 +61,27 @@ var data = {
       name: 'radiusBottom'
     },
     {
-      name: 'height'
+      name: 'height',
+      value: 3
     },
     {
-      name: 'radiusSegments'
+      name: 'radiusSegments',
+      value: 32
     },
     {
       name: 'heightSegments'
     },
     {
-      name: 'openEnded'
+      name: 'openEnded',
+      value: false
     },
     {
-      name: 'thetaStart'
+      name: 'thetaStart',
+      value: 0
     },
     {
-      name: 'thetaLength'
+      name: 'thetaLength',
+      value: Math.PI * 2
     }
   ],
 
@@ -79,13 +90,16 @@ var data = {
       name: 'radius'
     },
     {
-      name: 'segments'
+      name: 'segments',
+      value: 32
     },
     {
-      name: 'thetaStart'
+      name: 'thetaStart',
+      value: 0
     },
     {
-      name: 'thetaLength'
+      name: 'thetaLength',
+      value: Math.PI * 2
     }
   ],
 
@@ -98,6 +112,7 @@ var data = {
 
 };
 
+// Default values for some data object keys.
 var defaults = {
   value: 1,
   min: 1,
@@ -113,9 +128,32 @@ var getDataByLabel = _.curry((data, label) => {
 });
 
 var getParameterByNameOrDefault = _.curry((defaults, name, param) => {
-  return param[name] || defaults[name];
+  return _.isUndefined(param[name]) ? defaults[name] : param[name];
 });
 
 var getValueParameter = getParameterByNameOrDefault(defaults, 'value');
 
-export var getDefaultValuesByLabel = _.flowRight(map(getValueParameter), getDataByLabel(data));
+var decorateDataWithDefaults = _.curry((defaults, data) => {
+  return _.map(data, arg => {
+    return _.defaults(arg, defaults);
+  });
+});
+
+
+export default {
+
+  /**
+   * Retrieves the ordered default argument values for an object by label.
+   * @param {String} label The object label to retrieve default args for.
+   * @return {Array} The ordered collection of values.
+   */
+  getDefaultArgs: _.flowRight(map(getValueParameter), getDataByLabel(data)),
+
+  /**
+   * Retrieves an object's default data by label. This includes argument names,
+   * initial values, and value boundaries.
+   * @param {String} label The object label to retrieve data for.
+   * @return {Object} A map of all the default values.
+   */
+  getAllDefaults: _.flowRight(decorateDataWithDefaults(defaults), getDataByLabel(data))
+}

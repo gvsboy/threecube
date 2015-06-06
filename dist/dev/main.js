@@ -16,7 +16,17 @@ var _import = require('lodash');
 
 var _import2 = _interopRequireDefault(_import);
 
-var _createObjectByLabel = require('./factory');
+var _Factory = require('./factory');
+
+var _Factory2 = _interopRequireDefault(_Factory);
+
+var _Menu = require('./menu');
+
+var _Menu2 = _interopRequireDefault(_Menu);
+
+var _Util = require('./util');
+
+var _Util2 = _interopRequireDefault(_Util);
 
 // Troubleshooting.
 var trace = _import2['default'].curry(function (tag, x) {
@@ -47,15 +57,11 @@ var getObjectByName = _import2['default'].curry(function (scene, name) {
 // I guess this is not pure because I'm mutating the object. How else to do this?
 // Perhaps not all functions need to be pure.
 var nameObject = _import2['default'].curry(function (name, object) {
-  object.name = name;
+  if (object) {
+    object.name = name;
+  }
   return object;
 });
-
-// A little method for extracting factory labels (classes) from events.
-// If the input is not an object, return it.
-var getLabel = function getLabel(evt) {
-  return _import2['default'].isObject(evt) ? _import2['default'].capitalize(_import2['default'].camelCase(evt.target.className.split(' ')[0])) : evt;
-};
 
 /**
  * Fancy-schmancy render loop creator. Well, not **too** fancy anyways.
@@ -78,48 +84,6 @@ function startRenderLoop(scene, camera, renderer, getter) {
   })();
 }
 
-/**
- * START THE BUSTED STUFF ==========================================================================================
- */
-
-function horribleDOMMutationOnClick(evt) {
-
-  var SELECTED_CLASS = 'selected',
-      selected = document.getElementsByClassName(SELECTED_CLASS)[0],
-      properties = document.getElementById('properties'),
-      target = evt.target.parentNode;
-
-  // Right now, bail if it's not a factory button.
-  if (!evt.target.classList.contains('factory')) {
-    return;
-  }
-
-  // If there's a selected option, deselect it.
-  if (selected) {
-    selected.classList.remove(SELECTED_CLASS);
-  }
-
-  // Set the target element as selected.
-  target.classList.add(SELECTED_CLASS);
-
-  // Align the properties box with the selected button.
-  target.querySelector('.panel').appendChild(properties);
-
-  // Remove the previous object from the scene.
-  removeObjectByName(scene, OBJECT_NAME);
-
-  // Pass the event object along.
-  return evt;
-}
-
-function updateObjectOnInput(evt) {
-  console.log(evt.target.value);
-}
-
-/**
- * END THE BUSTED STUFF ==========================================================================================
- */
-
 // Some crap:
 var WIDTH = window.innerWidth,
     HEIGHT = window.innerHeight,
@@ -141,7 +105,7 @@ document.body.appendChild(renderer.domElement);
 // OK LET'S HAVE FUN.
 
 // Generic object adding method.
-var addObjectByLabel = _import2['default'].flowRight(addObject(scene), _createObjectByLabel.createObjectByLabel, getLabel);
+var addObjectByLabel = _import2['default'].flowRight(addObject(scene), trace('ok'), _Factory2['default'].createObject, _Util2['default'].getLabel);
 
 // Adds an object and sets the name as 'main'.
 var addAndNameObjectByLabel = _import2['default'].flowRight(nameObject(OBJECT_NAME), addObjectByLabel);
@@ -152,17 +116,25 @@ var removeObjectByName = _import2['default'].flowRight(removeObject(scene), getO
 // Retrieve the main object from the scene.
 var getMainObject = _import2['default'].partial(getObjectByName, scene, OBJECT_NAME);
 
-// Jank, but I'm not sure how to do better yet. The click handler
-// for swapping out the main object with a new one.
-var swapObjectOnClick = _import2['default'].flowRight(addAndNameObjectByLabel, horribleDOMMutationOnClick);
+// Removes the main object from the stage.
+var removeMainObject = _import2['default'].partial(removeObjectByName, scene, OBJECT_NAME);
 
-// Listen for button clicks.
-var factoryEl = window.document.getElementById('factory');
-factoryEl.addEventListener('click', swapObjectOnClick);
-// let's throttle this bad boy.
-factoryEl.addEventListener('input', _import2['default'].debounce(updateObjectOnInput, 100));
+// Is there a way to invoke a function but "pass through" the argument
+// from the function before it to the function after it?
+_Menu2['default'].listenTo('click', function (evt) {
+  if (evt) {
+    removeMainObject();
+    addAndNameObjectByLabel(evt);
+  }
+});
 
-// Shed some light on the subject.
+_Menu2['default'].listenTo('input', _import2['default'].debounce(function (evt) {
+  console.log('input here:', evt);
+  removeMainObject();
+  addAndNameObjectByLabel(evt);
+}, 100));
+
+// Shed some light on the subject. Gotta integrate this with factory.js.
 var light = light = new _THREE2['default'].PointLight(16777215);
 light.position.x = 0;
 light.position.y = 10;
@@ -175,7 +147,7 @@ addAndNameObjectByLabel(DEFAULT_OBJECT);
 // Start rendering that shiz!
 startRenderLoop(scene, camera, renderer, getMainObject);
 
-},{"./factory":3,"lodash":"lodash","three":"three"}],2:[function(require,module,exports){
+},{"./factory":3,"./menu":4,"./util":5,"lodash":"lodash","three":"three"}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -207,17 +179,23 @@ var data = {
   SphereGeometry: [{
     name: 'radius'
   }, {
-    name: 'widthSegments'
+    name: 'widthSegments',
+    value: 32
   }, {
-    name: 'heightSegments'
+    name: 'heightSegments',
+    value: 32
   }, {
-    name: 'phiStart'
+    name: 'phiStart',
+    value: 0
   }, {
-    name: 'phiLength'
+    name: 'phiLength',
+    value: Math.PI * 2
   }, {
-    name: 'thetaStart'
+    name: 'thetaStart',
+    value: 0
   }, {
-    name: 'thetaLength'
+    name: 'thetaLength',
+    value: Math.PI
   }],
 
   CylinderGeometry: [{
@@ -225,27 +203,35 @@ var data = {
   }, {
     name: 'radiusBottom'
   }, {
-    name: 'height'
+    name: 'height',
+    value: 3
   }, {
-    name: 'radiusSegments'
+    name: 'radiusSegments',
+    value: 32
   }, {
     name: 'heightSegments'
   }, {
-    name: 'openEnded'
+    name: 'openEnded',
+    value: false
   }, {
-    name: 'thetaStart'
+    name: 'thetaStart',
+    value: 0
   }, {
-    name: 'thetaLength'
+    name: 'thetaLength',
+    value: Math.PI * 2
   }],
 
   CircleGeometry: [{
     name: 'radius'
   }, {
-    name: 'segments'
+    name: 'segments',
+    value: 32
   }, {
-    name: 'thetaStart'
+    name: 'thetaStart',
+    value: 0
   }, {
-    name: 'thetaLength'
+    name: 'thetaLength',
+    value: Math.PI * 2
   }],
 
   PointLight: [{
@@ -255,6 +241,7 @@ var data = {
 
 };
 
+// Default values for some data object keys.
 var defaults = {
   value: 1,
   min: 1,
@@ -270,13 +257,35 @@ var getDataByLabel = _import2['default'].curry(function (data, label) {
 });
 
 var getParameterByNameOrDefault = _import2['default'].curry(function (defaults, name, param) {
-  return param[name] || defaults[name];
+  return _import2['default'].isUndefined(param[name]) ? defaults[name] : param[name];
 });
 
 var getValueParameter = getParameterByNameOrDefault(defaults, 'value');
 
-var getDefaultValuesByLabel = _import2['default'].flowRight(map(getValueParameter), getDataByLabel(data));
-exports.getDefaultValuesByLabel = getDefaultValuesByLabel;
+var decorateDataWithDefaults = _import2['default'].curry(function (defaults, data) {
+  return _import2['default'].map(data, function (arg) {
+    return _import2['default'].defaults(arg, defaults);
+  });
+});
+
+exports['default'] = {
+
+  /**
+   * Retrieves the ordered default argument values for an object by label.
+   * @param {String} label The object label to retrieve default args for.
+   * @return {Array} The ordered collection of values.
+   */
+  getDefaultArgs: _import2['default'].flowRight(map(getValueParameter), getDataByLabel(data)),
+
+  /**
+   * Retrieves an object's default data by label. This includes argument names,
+   * initial values, and value boundaries.
+   * @param {String} label The object label to retrieve data for.
+   * @return {Object} A map of all the default values.
+   */
+  getAllDefaults: _import2['default'].flowRight(decorateDataWithDefaults(defaults), getDataByLabel(data))
+};
+module.exports = exports['default'];
 
 },{"lodash":"lodash"}],3:[function(require,module,exports){
 'use strict';
@@ -295,70 +304,185 @@ var _import = require('lodash');
 
 var _import2 = _interopRequireDefault(_import);
 
-var _getDefaultValuesByLabel = require('./data');
+var _Data = require('./data');
 
-function generateInstance(constructor, args) {
-  function F() {
-    return constructor.apply(this, args);
+var _Data2 = _interopRequireDefault(_Data);
+
+function generateInstance(label, args) {
+
+  var constructor = _THREE2['default'][label];
+
+  if (_import2['default'].isFunction(constructor)) {
+    var F = function () {
+      return constructor.apply(this, args);
+    };
+
+    F.prototype = constructor.prototype;
+    return new F();
   }
-  F.prototype = constructor.prototype;
-  return new F();
+
+  return null;
 }
-
-function getConstructorFromLabel(label) {
-  return _THREE2['default'][label];
-}
-
-/*
-var generateObject = _.curry((constructorGetterFromLabel, generator) => {
-  return function(label, args) {
-    return generator(constructorGetterFromLabel(label), args);
-  };
-});
-*/
-
-//var generateObjectInstance = generateObject(generateInstance);
-
-//var generateGeometry = generateObjectInstance(getGeometryConstructorFromLabel);
 
 // Basic mesh material.
 var mesh = new _THREE2['default'].MeshLambertMaterial({ color: 65280 });
 
-var factories = {
-
-  boxGeometry: function boxGeometry() {
-    return new _THREE2['default'].Mesh(generateInstance(_THREE2['default'].BoxGeometry, [1, 1, 1]), mesh);
-  },
-
-  sphere: function sphere() {
-    return new _THREE2['default'].Mesh(generateInstance(_THREE2['default'].SphereGeometry, [1, 32, 32]), mesh);
-  },
-
-  cylinder: function cylinder() {
-    return new _THREE2['default'].Mesh(generateInstance(_THREE2['default'].CylinderGeometry, [1, 1, 3, 32]), mesh);
-  },
-
-  circle: function circle() {
-    return new _THREE2['default'].Mesh(generateInstance(_THREE2['default'].CircleGeometry, [1, 32]), mesh);
-  },
-
-  pointLight: function pointLight() {
-    return new _THREE2['default'].PointLight(16777215);
+var createObjectByLabelAndArgs = function createObjectByLabelAndArgs(label, args) {
+  var instance = generateInstance(label, args || _Data2['default'].getDefaultArgs(label));
+  if (instance) {
+    return new _THREE2['default'].Mesh(instance, mesh);
   }
-
+  return null;
 };
 
-// Find a factory method by label and attempt to create an object instance.
-var createObjectFromFactoryByLabel = _import2['default'].curry(function (factories, label) {
-  var factory = factories[_import2['default'].camelCase(label)];
-  return _import2['default'].isFunction(factory) && factory();
+exports['default'] = {
+  createObject: createObjectByLabelAndArgs
+};
+module.exports = exports['default'];
+
+},{"./data":2,"lodash":"lodash","three":"three"}],4:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
 });
 
-//export var createObjectByLabel = createObjectFromFactoryByLabel(factories);
+var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
-var createObjectByLabel = function createObjectByLabel(label) {
-  return new _THREE2['default'].Mesh(generateInstance(getConstructorFromLabel(label), _getDefaultValuesByLabel.getDefaultValuesByLabel(label)), mesh);
+var _import = require('lodash');
+
+var _import2 = _interopRequireDefault(_import);
+
+var _Handlebars = require('handlebars');
+
+var _Handlebars2 = _interopRequireDefault(_Handlebars);
+
+var _Util = require('./util');
+
+var _Util2 = _interopRequireDefault(_Util);
+
+var _Data = require('./data');
+
+var _Data2 = _interopRequireDefault(_Data);
+
+var SELECTED_CLASS = 'selected',
+    objectsMenu = document.getElementById('objects'),
+    generateTemplate = _Handlebars2['default'].compile(document.getElementById('properties-template').innerHTML);
+
+/**
+ * A wrapper for getElementsByClassName that only returns a single element.
+ * @param  {String} className The class name to find elements by.
+ * @return {DOMElement} The first found element.
+ */
+var getFirstElementByClassName = function getFirstElementByClassName(className) {
+  return _import2['default'].first(document.getElementsByClassName(className));
 };
-exports.createObjectByLabel = createObjectByLabel;
 
-},{"./data":2,"lodash":"lodash","three":"three"}]},{},[1]);
+/**
+ * Sets a class on a given element, first making sure that the class
+ * is removed from a previous element.
+ * @param {Function} getter A function used to find a previous element.
+ * @param {String} className The class to set.
+ * @param {DOMElement} newEl The element receiving the new class.
+ * @return {DOMElement} The newEl reference.
+ */
+var setUniqueClass = _import2['default'].curry(function (getter, className, newEl) {
+  var oldEl = getter(className);
+  if (oldEl) {
+    oldEl.classList.remove(className);
+  }
+  newEl.classList.add(className);
+  return newEl;
+});
+
+// Sets a unique 'selected' class on an element.
+var swapSelected = setUniqueClass(getFirstElementByClassName, SELECTED_CLASS);
+
+var handleClick = function handleClick(evt) {
+
+  var target = evt.target,
+      parent = target.parentNode,
+      panel = parent.querySelector('.panel');
+
+  // Right now, bail if it's not a factory button.
+  if (!target.classList.contains('factory')) {
+    return false;
+  }
+
+  // Unselect the old, select the new.
+  swapSelected(parent);
+
+  // Unattach propertiesMenu before updating.
+  if (panel.firstChild) {
+    panel.removeChild(panel.firstChild);
+  }
+
+  // Align the properties box with the selected button.
+  panel.innerHTML = generateTemplate(_Data2['default'].getAllDefaults(_Util2['default'].getLabel(evt)));
+
+  // Pass the event object along.
+  return evt;
+};
+
+var handleInput = _import2['default'].debounce(function (evt) {
+  console.log(evt.target.value);
+  return evt;
+}, 100);
+
+var listenTo = _import2['default'].curry(function (handlers, el, type, handler) {
+  var baseHandler = handlers[type];
+  if (baseHandler) {
+    handler = _import2['default'].flowRight(handler, baseHandler);
+  }
+  el.addEventListener(type, handler);
+});
+
+var handlers = {
+  click: handleClick,
+  input: handleInput
+};
+
+exports['default'] = {
+  listenTo: listenTo(handlers, objectsMenu)
+};
+module.exports = exports['default'];
+
+},{"./data":2,"./util":5,"handlebars":"handlebars","lodash":"lodash"}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+var _import = require('lodash');
+
+var _import2 = _interopRequireDefault(_import);
+
+var capitalCamelCase = _import2['default'].flowRight(_import2['default'].capitalize, _import2['default'].camelCase);
+
+function getFactoryValue(el) {
+  return el.dataset.factory;
+}
+
+function getLabelFromEventTarget(evt) {
+  var target = evt && evt.target;
+  if (target) {
+    return getFactoryValue(target) || getFactoryValue(target.closest('.selected').querySelector('button'));
+  }
+  return null;
+}
+
+// A little method for extracting factory labels (classes) from events.
+// If the input is not an object, return it.
+var getLabel = function getLabel(evt) {
+  return capitalCamelCase(getLabelFromEventTarget(evt)) || evt;
+};
+
+exports['default'] = {
+  getLabel: getLabel
+};
+module.exports = exports['default'];
+
+},{"lodash":"lodash"}]},{},[1]);

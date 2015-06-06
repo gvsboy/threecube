@@ -10,53 +10,56 @@
   
   <body>
 
-    <ul id="factory">
+    <ul id="objects">
 
       <li>
-        <button class="box-geometry factory">Box</button>
-        <div class="panel">
-
-          <div id="properties">
-            <button class="reset">Reset Shape to Defaults</button>
-
-            <!-- Inputs used for the material instance -->
-            <ul id="material">
-              <li>
-                <label for="input-color">Color</label>
-                <input id="input-color" type="color" value="#00ff00">
-              </li>
-            </ul>
-
-            <!-- Arguments used in creating the geometry instance, in order -->
-            <ul id="geometry">
-              <li>
-                <label for="input-width">Width</label>
-                <input id="input-width" type="range" min="1" max="10" step="1" value="1">
-                <output for="input-width" id="output-width">1</output>
-              </li>
-            </ul>
-
-          </div>
-
-        </div>
+        <button data-factory="box-geometry" class="factory">Box</button>
+        <div class="panel"></div>
       </li>
 
       <li>
-        <button class="sphere-geometry factory">Sphere</button>
+        <button data-factory="sphere-geometry" class="factory">Sphere</button>
         <div class="panel"></div>
       </li>
       <li>
-        <button class="cylinder-geometry factory">Cylinder</button>
+        <button data-factory="cylinder-geometry" class="factory">Cylinder</button>
         <div class="panel"></div>
       </li>
       <li>
-        <button class="circle-geometry factory">Circle</button>
+        <button data-factory="circle-geometry" class="factory">Circle</button>
         <div class="panel"></div>
       </li>
     </ul>
 
-    
+    <script id="properties-template" type="text/x-handlebars-template">
 
+      <div id="properties">
+        <button class="reset">Reset Shape to Defaults</button>
+
+        {{!-- Inputs used for the material instance --}}
+        <ul id="material">
+          <li>
+            <label for="input-color">Color</label>
+            <input id="input-color" type="color" value="#00ff00">
+          </li>
+        </ul>
+
+        {{!-- Arguments used in creating the geometry instance, in order --}}
+        <ul id="geometry">
+          {{#each this}}
+          <li>
+            <label>{{name}}
+              <input id="input-{{name}}" type="range" min="{{min}}" max="{{max}}" step="1" value="{{value}}">
+            </label>
+            <output for="input-{{name}}" id="output-{{name}}">{{value}}</output>
+          </li>
+          {{/each}}
+        </ul>
+
+      </div>
+
+    </script>
+    
     <script src="libs.js"></script>
     <script src="main.js"></script>
 

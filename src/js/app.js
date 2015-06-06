@@ -5,7 +5,9 @@
 
 import THREE from 'three';
 import _ from 'lodash';
-import {createObjectByLabel} from './factory';
+import Factory from './factory';
+import Menu from './menu';
+import Util from './util';
 
 // Troubleshooting.
 var trace = _.curry((tag, x) => {
@@ -36,15 +38,11 @@ var getObjectByName = _.curry((scene, name) => {
 // I guess this is not pure because I'm mutating the object. How else to do this?
 // Perhaps not all functions need to be pure.
 var nameObject = _.curry((name, object) => {
-  object.name = name;
+  if (object) {
+    object.name = name;
+  }
   return object;
 });
-
-// A little method for extracting factory labels (classes) from events.
-// If the input is not an object, return it.
-var getLabel = evt => {
-  return _.isObject(evt) ? _.capitalize(_.camelCase(evt.target.className.split(' ')[0])) : evt;
-};
 
 /**
  * Fancy-schmancy render loop creator. Well, not **too** fancy anyways.
@@ -67,50 +65,6 @@ function startRenderLoop(scene, camera, renderer, getter) {
   }());
 }
 
-
-/**
- * START THE BUSTED STUFF ==========================================================================================
- */
-
-function horribleDOMMutationOnClick(evt) {
-
-  var SELECTED_CLASS = 'selected',
-      selected = document.getElementsByClassName(SELECTED_CLASS)[0],
-      properties = document.getElementById('properties'),
-      target = evt.target.parentNode;
-
-  // Right now, bail if it's not a factory button.
-  if (!evt.target.classList.contains('factory')) {
-    return;
-  }
-
-  // If there's a selected option, deselect it.
-  if (selected) {
-    selected.classList.remove(SELECTED_CLASS);
-  }
-
-  // Set the target element as selected.
-  target.classList.add(SELECTED_CLASS);
-
-  // Align the properties box with the selected button.
-  target.querySelector('.panel').appendChild(properties);
-
-  // Remove the previous object from the scene.
-  removeObjectByName(scene, OBJECT_NAME);
-
-  // Pass the event object along.
-  return evt;
-}
-
-function updateObjectOnInput(evt) {
-  console.log(evt.target.value);
-}
-
-
-
-/**
- * END THE BUSTED STUFF ==========================================================================================
- */
 
 
 // Some crap:
@@ -136,7 +90,7 @@ document.body.appendChild(renderer.domElement);
 // OK LET'S HAVE FUN.
 
 // Generic object adding method.
-var addObjectByLabel = _.flowRight(addObject(scene), createObjectByLabel, getLabel);
+var addObjectByLabel = _.flowRight(addObject(scene), trace('ok'), Factory.createObject, Util.getLabel);
 
 // Adds an object and sets the name as 'main'.
 var addAndNameObjectByLabel = _.flowRight(nameObject(OBJECT_NAME), addObjectByLabel);
@@ -147,22 +101,35 @@ var removeObjectByName = _.flowRight(removeObject(scene), getObjectByName);
 // Retrieve the main object from the scene.
 var getMainObject = _.partial(getObjectByName, scene, OBJECT_NAME);
 
-// Jank, but I'm not sure how to do better yet. The click handler
-// for swapping out the main object with a new one.
-var swapObjectOnClick = _.flowRight(addAndNameObjectByLabel, horribleDOMMutationOnClick);
+// Removes the main object from the stage.
+var removeMainObject = _.partial(removeObjectByName, scene, OBJECT_NAME);
 
-// Listen for button clicks.
-var factoryEl = window.document.getElementById('factory')
-factoryEl.addEventListener('click', swapObjectOnClick);
-// let's throttle this bad boy.
-factoryEl.addEventListener('input', _.debounce(updateObjectOnInput, 100));
 
-// Shed some light on the subject.
+// Is there a way to invoke a function but "pass through" the argument
+// from the function before it to the function after it?
+Menu.listenTo('click', evt => {
+  if (evt) {
+    removeMainObject();
+    addAndNameObjectByLabel(evt);
+  }
+});
+
+Menu.listenTo('input', _.debounce(evt => {
+  console.log('input here:', evt);
+  removeMainObject();
+  addAndNameObjectByLabel(evt);
+}, 100));
+
+
+
+// Shed some light on the subject. Gotta integrate this with factory.js.
 var light = light = new THREE.PointLight(0xffffff);
 light.position.x = 0;
 light.position.y = 10;
 light.position.z = 100;
 addObject(scene, light);
+
+
 
 // Create the default shape.
 addAndNameObjectByLabel(DEFAULT_OBJECT);

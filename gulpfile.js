@@ -22,10 +22,8 @@ var DEV_DIR = 'dist/dev/',
 
     libraries = [
       'lodash',
-      'hammerjs',
-      'events',
-      'babel/polyfill',
-      'three'
+      'three',
+      'handlebars'
     ];
 
 gulp.task('dev-libs', function() {
