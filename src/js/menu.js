@@ -56,14 +56,18 @@ var handleClick = evt => {
   }
 
   // Align the properties box with the selected button.
-  panel.innerHTML = generateTemplate(Data.getAllDefaults(Util.getLabel(evt)));
+  panel.innerHTML = generateTemplate(Data.get(Util.getLabel(evt)));
 
   // Pass the event object along.
   return evt;
 };
 
 var handleInput = _.debounce(evt => {
-  console.log(evt.target.value);
+
+  var target = evt.target;
+  target.closest('li').querySelector('output').innerHTML = target.value;
+  Data.update(Util.getLabel(evt), target.name, target.value);
+
   return evt;
 }, 100);
 

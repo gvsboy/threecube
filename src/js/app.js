@@ -90,7 +90,7 @@ document.body.appendChild(renderer.domElement);
 // OK LET'S HAVE FUN.
 
 // Generic object adding method.
-var addObjectByLabel = _.flowRight(addObject(scene), trace('ok'), Factory.createObject, Util.getLabel);
+var addObjectByLabel = _.flowRight(addObject(scene), Factory.createObject, Util.getLabel);
 
 // Adds an object and sets the name as 'main'.
 var addAndNameObjectByLabel = _.flowRight(nameObject(OBJECT_NAME), addObjectByLabel);
@@ -115,7 +115,7 @@ Menu.listenTo('click', evt => {
 });
 
 Menu.listenTo('input', _.debounce(evt => {
-  console.log('input here:', evt);
+//  console.log('input here:', evt);
   removeMainObject();
   addAndNameObjectByLabel(evt);
 }, 100));

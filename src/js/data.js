@@ -123,9 +123,33 @@ var defaults = {
 //var map = _.rearg(_.curry(_.map, 2), [1, 0]);
 var map = _(_.map).rearg([1, 0]).curry(2).value();
 
-var getDataByLabel = _.curry((data, label) => {
-  return data[label];
+/**
+ * Deeply clones a node from a data object and returns the result.
+ * @param {Object} data The base data object.
+ * @param {String} label The key to clone.
+ * @return {Object} The freshly-cloned data.
+ */
+var cloneBaseDataByLabel = _.curry((data, label) => _.cloneDeep(data[label]));
+
+/**
+ * Merges nodes in a data map with provided defaults.
+ * @param {Object} defaults A shallow map of default values to merge.
+ * @param {Object} data The base data you wish to decorate.
+ * @return {Object} The decorated data.
+ */
+var decorateDataWithDefaults = _.curry((defaults, data) => {
+  return _.map(data, arg => {
+    return _.defaults(arg, defaults);
+  });
 });
+
+/**
+ * Retrieves an object's default data by label. This includes argument names,
+ * initial values, and value boundaries.
+ * @param {String} label The object label to retrieve data for.
+ * @return {Object} A map of all the default values.
+ */
+var getDefault = _.flowRight(decorateDataWithDefaults(defaults), cloneBaseDataByLabel(data));
 
 var getParameterByNameOrDefault = _.curry((defaults, name, param) => {
   return _.isUndefined(param[name]) ? defaults[name] : param[name];
@@ -133,27 +157,38 @@ var getParameterByNameOrDefault = _.curry((defaults, name, param) => {
 
 var getValueParameter = getParameterByNameOrDefault(defaults, 'value');
 
-var decorateDataWithDefaults = _.curry((defaults, data) => {
-  return _.map(data, arg => {
-    return _.defaults(arg, defaults);
-  });
-});
+var cache = {};
+var get = (cache, label) => cache[label];
+var set = (cache, label, data) => {
+  cache[label] = data;
+  return data;
+};
+var update = (cache, label, key, value) => {
+  _.find(cache[label], {name: key}).value = value;
+  return cache[label];
+};
 
+var getCache = _.partial(get, cache);
+var setCache = _.partial(set, cache);
+var updateCache = _.partial(update, cache);
+
+/**
+ * Retrieves data by label or sets the default data for the label
+ * and returns it.
+ * @param {String} label The label to retrieve data for.
+ * @return {Object} The data payload.
+ */
+var getOrGetAndSetDefault = label => getCache(label) || setCache(label, getDefault(label));
+
+/**
+ * Retrieves the ordered argument values for an object by label.
+ * @param {String} label The object label to retrieve default args for.
+ * @return {Array} The ordered collection of values.
+ */
+var getArgumentList = _.flowRight(map(getValueParameter), getOrGetAndSetDefault);
 
 export default {
-
-  /**
-   * Retrieves the ordered default argument values for an object by label.
-   * @param {String} label The object label to retrieve default args for.
-   * @return {Array} The ordered collection of values.
-   */
-  getDefaultArgs: _.flowRight(map(getValueParameter), getDataByLabel(data)),
-
-  /**
-   * Retrieves an object's default data by label. This includes argument names,
-   * initial values, and value boundaries.
-   * @param {String} label The object label to retrieve data for.
-   * @return {Object} A map of all the default values.
-   */
-  getAllDefaults: _.flowRight(decorateDataWithDefaults(defaults), getDataByLabel(data))
+  get: getOrGetAndSetDefault,
+  getArgs: getArgumentList,
+  update: updateCache
 }

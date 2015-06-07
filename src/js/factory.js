@@ -20,8 +20,8 @@ function generateInstance(label, args) {
 // Basic mesh material.
 var mesh = new THREE.MeshLambertMaterial({color: 0x00ff00});
 
-var createObjectByLabelAndArgs = (label, args) => {
-  var instance = generateInstance(label, args || Data.getDefaultArgs(label));
+var createObjectByLabel = (label) => {
+  var instance = generateInstance(label, Data.getArgs(label));
   if (instance) {
     return new THREE.Mesh(instance, mesh);
   }
@@ -29,5 +29,5 @@ var createObjectByLabelAndArgs = (label, args) => {
 };
 
 export default {
-  createObject: createObjectByLabelAndArgs
+  createObject: createObjectByLabel
 };

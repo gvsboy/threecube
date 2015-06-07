@@ -105,7 +105,7 @@ document.body.appendChild(renderer.domElement);
 // OK LET'S HAVE FUN.
 
 // Generic object adding method.
-var addObjectByLabel = _import2['default'].flowRight(addObject(scene), trace('ok'), _Factory2['default'].createObject, _Util2['default'].getLabel);
+var addObjectByLabel = _import2['default'].flowRight(addObject(scene), _Factory2['default'].createObject, _Util2['default'].getLabel);
 
 // Adds an object and sets the name as 'main'.
 var addAndNameObjectByLabel = _import2['default'].flowRight(nameObject(OBJECT_NAME), addObjectByLabel);
@@ -129,7 +129,7 @@ _Menu2['default'].listenTo('click', function (evt) {
 });
 
 _Menu2['default'].listenTo('input', _import2['default'].debounce(function (evt) {
-  console.log('input here:', evt);
+  //  console.log('input here:', evt);
   removeMainObject();
   addAndNameObjectByLabel(evt);
 }, 100));
@@ -252,9 +252,35 @@ var defaults = {
 //var map = _.rearg(_.curry(_.map, 2), [1, 0]);
 var map = _import2['default'](_import2['default'].map).rearg([1, 0]).curry(2).value();
 
-var getDataByLabel = _import2['default'].curry(function (data, label) {
-  return data[label];
+/**
+ * Deeply clones a node from a data object and returns the result.
+ * @param {Object} data The base data object.
+ * @param {String} label The key to clone.
+ * @return {Object} The freshly-cloned data.
+ */
+var cloneBaseDataByLabel = _import2['default'].curry(function (data, label) {
+  return _import2['default'].cloneDeep(data[label]);
 });
+
+/**
+ * Merges nodes in a data map with provided defaults.
+ * @param {Object} defaults A shallow map of default values to merge.
+ * @param {Object} data The base data you wish to decorate.
+ * @return {Object} The decorated data.
+ */
+var decorateDataWithDefaults = _import2['default'].curry(function (defaults, data) {
+  return _import2['default'].map(data, function (arg) {
+    return _import2['default'].defaults(arg, defaults);
+  });
+});
+
+/**
+ * Retrieves an object's default data by label. This includes argument names,
+ * initial values, and value boundaries.
+ * @param {String} label The object label to retrieve data for.
+ * @return {Object} A map of all the default values.
+ */
+var getDefault = _import2['default'].flowRight(decorateDataWithDefaults(defaults), cloneBaseDataByLabel(data));
 
 var getParameterByNameOrDefault = _import2['default'].curry(function (defaults, name, param) {
   return _import2['default'].isUndefined(param[name]) ? defaults[name] : param[name];
@@ -262,28 +288,44 @@ var getParameterByNameOrDefault = _import2['default'].curry(function (defaults, 
 
 var getValueParameter = getParameterByNameOrDefault(defaults, 'value');
 
-var decorateDataWithDefaults = _import2['default'].curry(function (defaults, data) {
-  return _import2['default'].map(data, function (arg) {
-    return _import2['default'].defaults(arg, defaults);
-  });
-});
+var cache = {};
+var get = function get(cache, label) {
+  return cache[label];
+};
+var set = function set(cache, label, data) {
+  cache[label] = data;
+  return data;
+};
+var update = function update(cache, label, key, value) {
+  _import2['default'].find(cache[label], { name: key }).value = value;
+  return cache[label];
+};
+
+var getCache = _import2['default'].partial(get, cache);
+var setCache = _import2['default'].partial(set, cache);
+var updateCache = _import2['default'].partial(update, cache);
+
+/**
+ * Retrieves data by label or sets the default data for the label
+ * and returns it.
+ * @param {String} label The label to retrieve data for.
+ * @return {Object} The data payload.
+ */
+var getOrGetAndSetDefault = function getOrGetAndSetDefault(label) {
+  return getCache(label) || setCache(label, getDefault(label));
+};
+
+/**
+ * Retrieves the ordered argument values for an object by label.
+ * @param {String} label The object label to retrieve default args for.
+ * @return {Array} The ordered collection of values.
+ */
+var getArgumentList = _import2['default'].flowRight(map(getValueParameter), getOrGetAndSetDefault);
 
 exports['default'] = {
-
-  /**
-   * Retrieves the ordered default argument values for an object by label.
-   * @param {String} label The object label to retrieve default args for.
-   * @return {Array} The ordered collection of values.
-   */
-  getDefaultArgs: _import2['default'].flowRight(map(getValueParameter), getDataByLabel(data)),
-
-  /**
-   * Retrieves an object's default data by label. This includes argument names,
-   * initial values, and value boundaries.
-   * @param {String} label The object label to retrieve data for.
-   * @return {Object} A map of all the default values.
-   */
-  getAllDefaults: _import2['default'].flowRight(decorateDataWithDefaults(defaults), getDataByLabel(data))
+  get: getOrGetAndSetDefault,
+  getArgs: getArgumentList,
+  update: updateCache
 };
 module.exports = exports['default'];
 
@@ -327,8 +369,8 @@ function generateInstance(label, args) {
 // Basic mesh material.
 var mesh = new _THREE2['default'].MeshLambertMaterial({ color: 65280 });
 
-var createObjectByLabelAndArgs = function createObjectByLabelAndArgs(label, args) {
-  var instance = generateInstance(label, args || _Data2['default'].getDefaultArgs(label));
+var createObjectByLabel = function createObjectByLabel(label) {
+  var instance = generateInstance(label, _Data2['default'].getArgs(label));
   if (instance) {
     return new _THREE2['default'].Mesh(instance, mesh);
   }
@@ -336,7 +378,7 @@ var createObjectByLabelAndArgs = function createObjectByLabelAndArgs(label, args
 };
 
 exports['default'] = {
-  createObject: createObjectByLabelAndArgs
+  createObject: createObjectByLabel
 };
 module.exports = exports['default'];
 
@@ -418,14 +460,18 @@ var handleClick = function handleClick(evt) {
   }
 
   // Align the properties box with the selected button.
-  panel.innerHTML = generateTemplate(_Data2['default'].getAllDefaults(_Util2['default'].getLabel(evt)));
+  panel.innerHTML = generateTemplate(_Data2['default'].get(_Util2['default'].getLabel(evt)));
 
   // Pass the event object along.
   return evt;
 };
 
 var handleInput = _import2['default'].debounce(function (evt) {
-  console.log(evt.target.value);
+
+  var target = evt.target;
+  target.closest('li').querySelector('output').innerHTML = target.value;
+  _Data2['default'].update(_Util2['default'].getLabel(evt), target.name, target.value);
+
   return evt;
 }, 100);
 
