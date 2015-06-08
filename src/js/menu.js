@@ -62,14 +62,13 @@ var handleClick = evt => {
   return evt;
 };
 
-var handleInput = _.debounce(evt => {
+var handleInput = evt => {
 
   var target = evt.target;
   target.closest('li').querySelector('output').innerHTML = target.value;
   Data.update(Util.getLabel(evt), target.name, target.value);
-
   return evt;
-}, 100);
+};
 
 var listenTo = _.curry((handlers, el, type, handler) => {
   var baseHandler = handlers[type];

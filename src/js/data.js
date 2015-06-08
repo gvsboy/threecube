@@ -1,121 +1,12 @@
 import _ from 'lodash';
-
-var data = {
-
-  BoxGeometry: [
-    {
-      name: 'width'
-    },
-    {
-      name: 'height'
-    },
-    {
-      name: 'depth'
-    },
-    {
-      name: 'widthSegments'
-    },
-    {
-      name: 'heightSegments'
-    },
-    {
-      name: 'depthSegments'
-    }
-  ],
-
-  SphereGeometry: [
-    {
-      name: 'radius'
-    },
-    {
-      name: 'widthSegments',
-      value: 32
-    },
-    {
-      name: 'heightSegments',
-      value: 32
-    },
-    {
-      name: 'phiStart',
-      value: 0
-    },
-    {
-      name: 'phiLength',
-      value: Math.PI * 2
-    },
-    {
-      name: 'thetaStart',
-      value: 0
-    },
-    {
-      name: 'thetaLength',
-      value: Math.PI
-    }
-  ],
-
-  CylinderGeometry: [
-    {
-      name: 'radiusTop'
-    },
-    {
-      name: 'radiusBottom'
-    },
-    {
-      name: 'height',
-      value: 3
-    },
-    {
-      name: 'radiusSegments',
-      value: 32
-    },
-    {
-      name: 'heightSegments'
-    },
-    {
-      name: 'openEnded',
-      value: false
-    },
-    {
-      name: 'thetaStart',
-      value: 0
-    },
-    {
-      name: 'thetaLength',
-      value: Math.PI * 2
-    }
-  ],
-
-  CircleGeometry: [
-    {
-      name: 'radius'
-    },
-    {
-      name: 'segments',
-      value: 32
-    },
-    {
-      name: 'thetaStart',
-      value: 0
-    },
-    {
-      name: 'thetaLength',
-      value: Math.PI * 2
-    }
-  ],
-
-  PointLight : [
-    {
-      name: 'hex',
-      value: 0xffffff
-    }
-  ]
-
-};
+import GeometryData from './data/geometry';
 
 // Default values for some data object keys.
+// Maybe this should be in geometry data...
 var defaults = {
   value: 1,
-  min: 1,
+  step: 0.1,
+  min: 0.1,
   max: 10
 };
 
@@ -149,7 +40,7 @@ var decorateDataWithDefaults = _.curry((defaults, data) => {
  * @param {String} label The object label to retrieve data for.
  * @return {Object} A map of all the default values.
  */
-var getDefault = _.flowRight(decorateDataWithDefaults(defaults), cloneBaseDataByLabel(data));
+var getDefault = _.flowRight(decorateDataWithDefaults(defaults), cloneBaseDataByLabel(GeometryData));
 
 var getParameterByNameOrDefault = _.curry((defaults, name, param) => {
   return _.isUndefined(param[name]) ? defaults[name] : param[name];

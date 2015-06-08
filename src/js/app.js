@@ -114,11 +114,10 @@ Menu.listenTo('click', evt => {
   }
 });
 
-Menu.listenTo('input', _.debounce(evt => {
-//  console.log('input here:', evt);
+Menu.listenTo('input', evt => {
   removeMainObject();
   addAndNameObjectByLabel(evt);
-}, 100));
+});
 
 
 

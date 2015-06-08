@@ -128,11 +128,10 @@ _Menu2['default'].listenTo('click', function (evt) {
   }
 });
 
-_Menu2['default'].listenTo('input', _import2['default'].debounce(function (evt) {
-  //  console.log('input here:', evt);
+_Menu2['default'].listenTo('input', function (evt) {
   removeMainObject();
   addAndNameObjectByLabel(evt);
-}, 100));
+});
 
 // Shed some light on the subject. Gotta integrate this with factory.js.
 var light = light = new _THREE2['default'].PointLight(16777215);
@@ -147,7 +146,7 @@ addAndNameObjectByLabel(DEFAULT_OBJECT);
 // Start rendering that shiz!
 startRenderLoop(scene, camera, renderer, getMainObject);
 
-},{"./factory":3,"./menu":4,"./util":5,"lodash":"lodash","three":"three"}],2:[function(require,module,exports){
+},{"./factory":4,"./menu":5,"./util":6,"lodash":"lodash","three":"three"}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -160,91 +159,16 @@ var _import = require('lodash');
 
 var _import2 = _interopRequireDefault(_import);
 
-var data = {
+var _GeometryData = require('./data/geometry');
 
-  BoxGeometry: [{
-    name: 'width'
-  }, {
-    name: 'height'
-  }, {
-    name: 'depth'
-  }, {
-    name: 'widthSegments'
-  }, {
-    name: 'heightSegments'
-  }, {
-    name: 'depthSegments'
-  }],
-
-  SphereGeometry: [{
-    name: 'radius'
-  }, {
-    name: 'widthSegments',
-    value: 32
-  }, {
-    name: 'heightSegments',
-    value: 32
-  }, {
-    name: 'phiStart',
-    value: 0
-  }, {
-    name: 'phiLength',
-    value: Math.PI * 2
-  }, {
-    name: 'thetaStart',
-    value: 0
-  }, {
-    name: 'thetaLength',
-    value: Math.PI
-  }],
-
-  CylinderGeometry: [{
-    name: 'radiusTop'
-  }, {
-    name: 'radiusBottom'
-  }, {
-    name: 'height',
-    value: 3
-  }, {
-    name: 'radiusSegments',
-    value: 32
-  }, {
-    name: 'heightSegments'
-  }, {
-    name: 'openEnded',
-    value: false
-  }, {
-    name: 'thetaStart',
-    value: 0
-  }, {
-    name: 'thetaLength',
-    value: Math.PI * 2
-  }],
-
-  CircleGeometry: [{
-    name: 'radius'
-  }, {
-    name: 'segments',
-    value: 32
-  }, {
-    name: 'thetaStart',
-    value: 0
-  }, {
-    name: 'thetaLength',
-    value: Math.PI * 2
-  }],
-
-  PointLight: [{
-    name: 'hex',
-    value: 16777215
-  }]
-
-};
+var _GeometryData2 = _interopRequireDefault(_GeometryData);
 
 // Default values for some data object keys.
+// Maybe this should be in geometry data...
 var defaults = {
   value: 1,
-  min: 1,
+  step: 0.1,
+  min: 0.1,
   max: 10
 };
 
@@ -280,7 +204,7 @@ var decorateDataWithDefaults = _import2['default'].curry(function (defaults, dat
  * @param {String} label The object label to retrieve data for.
  * @return {Object} A map of all the default values.
  */
-var getDefault = _import2['default'].flowRight(decorateDataWithDefaults(defaults), cloneBaseDataByLabel(data));
+var getDefault = _import2['default'].flowRight(decorateDataWithDefaults(defaults), cloneBaseDataByLabel(_GeometryData2['default']));
 
 var getParameterByNameOrDefault = _import2['default'].curry(function (defaults, name, param) {
   return _import2['default'].isUndefined(param[name]) ? defaults[name] : param[name];
@@ -329,7 +253,132 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"lodash":"lodash"}],3:[function(require,module,exports){
+},{"./data/geometry":3,"lodash":"lodash"}],3:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports['default'] = {
+
+  BoxGeometry: [{
+    name: 'width' }, {
+    name: 'height'
+  }, {
+    name: 'depth'
+  }, {
+    name: 'widthSegments',
+    step: 1,
+    min: 1
+  }, {
+    name: 'heightSegments',
+    step: 1,
+    min: 1
+  }, {
+    name: 'depthSegments',
+    step: 1,
+    min: 1
+  }],
+
+  SphereGeometry: [{
+    name: 'radius',
+    max: 4
+  }, {
+    name: 'widthSegments',
+    value: 32,
+    step: 1,
+    min: 1,
+    max: 64
+  }, {
+    name: 'heightSegments',
+    value: 32,
+    step: 1,
+    min: 1,
+    max: 64
+  }, {
+    name: 'phiStart',
+    value: 0,
+    step: 1,
+    min: 0,
+    max: 360
+  }, {
+    name: 'phiLength',
+    value: Math.PI * 2,
+    max: 360
+  }, {
+    name: 'thetaStart',
+    value: 0,
+    step: 1,
+    min: 0,
+    max: 360
+  }, {
+    name: 'thetaLength',
+    value: Math.PI * 2,
+    max: 360
+  }],
+
+  CylinderGeometry: [{
+    name: 'radiusTop',
+    step: 1,
+    min: 1
+  }, {
+    name: 'radiusBottom',
+    step: 1,
+    min: 1
+  }, {
+    name: 'height',
+    value: 3
+  }, {
+    name: 'radiusSegments',
+    value: 32,
+    step: 1,
+    min: 1,
+    max: 64
+  }, {
+    name: 'heightSegments',
+    step: 1,
+    min: 1,
+    max: 64
+  }, {
+    name: 'openEnded',
+    value: false
+  }, {
+    name: 'thetaStart',
+    value: 0,
+    step: 1,
+    min: 0,
+    max: 360
+  }, {
+    name: 'thetaLength',
+    value: Math.PI * 2,
+    max: 360
+  }],
+
+  CircleGeometry: [{
+    name: 'radius',
+    max: 4
+  }, {
+    name: 'segments',
+    value: 32,
+    step: 1,
+    min: 1,
+    max: 64
+  }, {
+    name: 'thetaStart',
+    value: 0,
+    step: 1,
+    min: 0,
+    max: 360
+  }, {
+    name: 'thetaLength',
+    value: Math.PI * 2,
+    max: 360
+  }]
+
+};
+module.exports = exports['default'];
+
+},{}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -382,7 +431,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./data":2,"lodash":"lodash","three":"three"}],4:[function(require,module,exports){
+},{"./data":2,"lodash":"lodash","three":"three"}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -466,14 +515,13 @@ var handleClick = function handleClick(evt) {
   return evt;
 };
 
-var handleInput = _import2['default'].debounce(function (evt) {
+var handleInput = function handleInput(evt) {
 
   var target = evt.target;
   target.closest('li').querySelector('output').innerHTML = target.value;
   _Data2['default'].update(_Util2['default'].getLabel(evt), target.name, target.value);
-
   return evt;
-}, 100);
+};
 
 var listenTo = _import2['default'].curry(function (handlers, el, type, handler) {
   var baseHandler = handlers[type];
@@ -493,7 +541,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./data":2,"./util":5,"handlebars":"handlebars","lodash":"lodash"}],5:[function(require,module,exports){
+},{"./data":2,"./util":6,"handlebars":"handlebars","lodash":"lodash"}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
