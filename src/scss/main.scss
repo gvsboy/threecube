@@ -1,5 +1,6 @@
 $text-color: #fff;
 $panel-gutter: 0.4em;
+$menu-width: 10em;
 
 body {
   margin: 0;
@@ -18,13 +19,17 @@ ul {
   list-style-type: none;
 }
 
+label, output {
+  font-size: 0.8rem;
+}
+
 #objects {
   position: absolute;
   top: 1em;
   left: 1em;
   margin: 0;
   padding: 0;
-  width: 8em;
+  width: $menu-width;
   z-index: 10;
 
   li {
@@ -69,7 +74,7 @@ ul {
 #properties {
   position: absolute;
   width: 18em;
-  padding-left: 8em;
+  padding-left: $menu-width;
   border-top: 0.2em solid $text-color;
   color: $text-color;
 }

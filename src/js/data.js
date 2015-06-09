@@ -63,13 +63,15 @@ var getCache = _.partial(get, cache);
 var setCache = _.partial(set, cache);
 var updateCache = _.partial(update, cache);
 
+var setDefault = label => setCache(label, getDefault(label));
+
 /**
  * Retrieves data by label or sets the default data for the label
  * and returns it.
  * @param {String} label The label to retrieve data for.
  * @return {Object} The data payload.
  */
-var getOrGetAndSetDefault = label => getCache(label) || setCache(label, getDefault(label));
+var getOrGetAndSetDefault = label => getCache(label) || setDefault(label);
 
 /**
  * Retrieves the ordered argument values for an object by label.
@@ -81,5 +83,6 @@ var getArgumentList = _.flowRight(map(getValueParameter), getOrGetAndSetDefault)
 export default {
   get: getOrGetAndSetDefault,
   getArgs: getArgumentList,
-  update: updateCache
+  update: updateCache,
+  reset: setDefault
 }

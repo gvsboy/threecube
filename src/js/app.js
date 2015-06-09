@@ -119,7 +119,7 @@ Menu.listenTo('input', evt => {
   addAndNameObjectByLabel(evt);
 });
 
-
+Menu.generate();
 
 // Shed some light on the subject. Gotta integrate this with factory.js.
 var light = light = new THREE.PointLight(0xffffff);

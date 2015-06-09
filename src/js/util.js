@@ -1,7 +1,5 @@
 import _ from 'lodash';
 
-var capitalCamelCase = _.flowRight(_.capitalize, _.camelCase);
-
 function getFactoryValue(el) {
   return el.dataset.factory;
 }
@@ -17,7 +15,7 @@ function getLabelFromEventTarget(evt) {
 // A little method for extracting factory labels (classes) from events.
 // If the input is not an object, return it.
 var getLabel = evt => {
-  return capitalCamelCase(getLabelFromEventTarget(evt)) || evt;
+  return getLabelFromEventTarget(evt) || evt;
 };
 
 export default {

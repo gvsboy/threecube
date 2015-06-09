@@ -2,10 +2,12 @@ import _ from 'lodash';
 import Handlebars from 'handlebars';
 import Util from './util';
 import Data from './data';
+import GeometryData from './data/geometry';
 
 var SELECTED_CLASS = 'selected',
     objectsMenu = document.getElementById('objects'),
-    generateTemplate = Handlebars.compile(document.getElementById('properties-template').innerHTML);
+    generatePropertiesTemplate = Handlebars.compile(document.getElementById('properties-template').innerHTML),
+    generateGeometryTemplate = Handlebars.compile(document.getElementById('geometry-template').innerHTML);
 
 /**
  * A wrapper for getElementsByClassName that only returns a single element.
@@ -39,11 +41,17 @@ var swapSelected = setUniqueClass(getFirstElementByClassName, SELECTED_CLASS);
 var handleClick = evt => {
 
   var target = evt.target,
-      parent = target.parentNode,
-      panel = parent.querySelector('.panel');
+      parent = target.closest('li'),
+      panel = parent.querySelector('.panel'),
+      label = Util.getLabel(evt);
 
-  // Right now, bail if it's not a factory button.
-  if (!target.classList.contains('factory')) {
+  // Reset the object if the reset button was pressed.
+  if (target.classList.contains('reset')) {
+    Data.reset(label);
+  }
+
+  // Otherwise, bail if it's not a factory button.
+  else if (!target.classList.contains('factory')) {
     return false;
   }
 
@@ -56,10 +64,10 @@ var handleClick = evt => {
   }
 
   // Align the properties box with the selected button.
-  panel.innerHTML = generateTemplate(Data.get(Util.getLabel(evt)));
+  panel.innerHTML = generatePropertiesTemplate(Data.get(label));
 
   // Pass the event object along.
-  return evt;
+  return label;
 };
 
 var handleInput = evt => {
@@ -83,6 +91,12 @@ var handlers = {
   input: handleInput
 };
 
+var generateMenu = () => {
+  var data = _.keys(GeometryData);
+  document.getElementById('objects').innerHTML = generateGeometryTemplate(data);
+};
+
 export default {
+  generate: generateMenu,
   listenTo: listenTo(handlers, objectsMenu)
 };

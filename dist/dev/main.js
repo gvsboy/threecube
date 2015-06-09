@@ -133,6 +133,8 @@ _Menu2['default'].listenTo('input', function (evt) {
   addAndNameObjectByLabel(evt);
 });
 
+_Menu2['default'].generate();
+
 // Shed some light on the subject. Gotta integrate this with factory.js.
 var light = light = new _THREE2['default'].PointLight(16777215);
 light.position.x = 0;
@@ -229,6 +231,10 @@ var getCache = _import2['default'].partial(get, cache);
 var setCache = _import2['default'].partial(set, cache);
 var updateCache = _import2['default'].partial(update, cache);
 
+var setDefault = function setDefault(label) {
+  return setCache(label, getDefault(label));
+};
+
 /**
  * Retrieves data by label or sets the default data for the label
  * and returns it.
@@ -236,7 +242,7 @@ var updateCache = _import2['default'].partial(update, cache);
  * @return {Object} The data payload.
  */
 var getOrGetAndSetDefault = function getOrGetAndSetDefault(label) {
-  return getCache(label) || setCache(label, getDefault(label));
+  return getCache(label) || setDefault(label);
 };
 
 /**
@@ -249,7 +255,8 @@ var getArgumentList = _import2['default'].flowRight(map(getValueParameter), getO
 exports['default'] = {
   get: getOrGetAndSetDefault,
   getArgs: getArgumentList,
-  update: updateCache
+  update: updateCache,
+  reset: setDefault
 };
 module.exports = exports['default'];
 
@@ -373,7 +380,102 @@ exports['default'] = {
     name: 'thetaLength',
     value: Math.PI * 2,
     max: 360
+  }],
+
+  DodecahedronGeometry: [{
+    name: 'radius',
+    max: 4
+  }, {
+    name: 'detail',
+    value: 0,
+    step: 1,
+    min: 0,
+    max: 4
+  }],
+
+  IcosahedronGeometry: [{
+    name: 'radius',
+    max: 4
+  }, {
+    name: 'detail',
+    value: 0,
+    step: 1,
+    min: 0,
+    max: 4
+  }],
+
+  OctahedronGeometry: [{
+    name: 'radius',
+    max: 4
+  }, {
+    name: 'detail',
+    value: 0,
+    step: 1,
+    min: 0,
+    max: 4
+  }],
+
+  PlaneGeometry: [{
+    name: 'width'
+  }, {
+    name: 'height'
+  }, {
+    name: 'widthSegments',
+    step: 1,
+    min: 1
+  }, {
+    name: 'heightSegments',
+    step: 1,
+    min: 1
+  }],
+
+  PlaneBufferGeometry: [{
+    name: 'width'
+  }, {
+    name: 'height'
+  }, {
+    name: 'widthSegments',
+    step: 1,
+    min: 1
+  }, {
+    name: 'heightSegments',
+    step: 1,
+    min: 1
+  }],
+
+  RingGeometry: [{
+    name: 'innerRadius',
+    value: 1,
+    min: 0
+  }, {
+    name: 'outerRadius',
+    value: 50,
+    max: 50
+  }, {
+    name: 'thetaSegments',
+    value: 8,
+    step: 1,
+    min: 0,
+    max: 32
+  }, {
+    name: 'phiSegments',
+    value: 8,
+    step: 1,
+    min: 1
+  }, {
+    name: 'thetaStart',
+    value: 0,
+    step: 1,
+    min: 0
+  }, {
+    name: 'thetaLength',
+    value: Math.PI * 2,
+    max: Math.PI * 2
   }]
+
+  // ExtrudeGeometry
+  // LatheGeometry
+  // ParametricGeometry
 
 };
 module.exports = exports['default'];
@@ -456,9 +558,14 @@ var _Data = require('./data');
 
 var _Data2 = _interopRequireDefault(_Data);
 
+var _GeometryData = require('./data/geometry');
+
+var _GeometryData2 = _interopRequireDefault(_GeometryData);
+
 var SELECTED_CLASS = 'selected',
     objectsMenu = document.getElementById('objects'),
-    generateTemplate = _Handlebars2['default'].compile(document.getElementById('properties-template').innerHTML);
+    generatePropertiesTemplate = _Handlebars2['default'].compile(document.getElementById('properties-template').innerHTML),
+    generateGeometryTemplate = _Handlebars2['default'].compile(document.getElementById('geometry-template').innerHTML);
 
 /**
  * A wrapper for getElementsByClassName that only returns a single element.
@@ -492,11 +599,17 @@ var swapSelected = setUniqueClass(getFirstElementByClassName, SELECTED_CLASS);
 var handleClick = function handleClick(evt) {
 
   var target = evt.target,
-      parent = target.parentNode,
-      panel = parent.querySelector('.panel');
+      parent = target.closest('li'),
+      panel = parent.querySelector('.panel'),
+      label = _Util2['default'].getLabel(evt);
 
-  // Right now, bail if it's not a factory button.
-  if (!target.classList.contains('factory')) {
+  // Reset the object if the reset button was pressed.
+  if (target.classList.contains('reset')) {
+    _Data2['default'].reset(label);
+  }
+
+  // Otherwise, bail if it's not a factory button.
+  else if (!target.classList.contains('factory')) {
     return false;
   }
 
@@ -509,10 +622,10 @@ var handleClick = function handleClick(evt) {
   }
 
   // Align the properties box with the selected button.
-  panel.innerHTML = generateTemplate(_Data2['default'].get(_Util2['default'].getLabel(evt)));
+  panel.innerHTML = generatePropertiesTemplate(_Data2['default'].get(label));
 
   // Pass the event object along.
-  return evt;
+  return label;
 };
 
 var handleInput = function handleInput(evt) {
@@ -536,12 +649,18 @@ var handlers = {
   input: handleInput
 };
 
+var generateMenu = function generateMenu() {
+  var data = _import2['default'].keys(_GeometryData2['default']);
+  document.getElementById('objects').innerHTML = generateGeometryTemplate(data);
+};
+
 exports['default'] = {
+  generate: generateMenu,
   listenTo: listenTo(handlers, objectsMenu)
 };
 module.exports = exports['default'];
 
-},{"./data":2,"./util":6,"handlebars":"handlebars","lodash":"lodash"}],6:[function(require,module,exports){
+},{"./data":2,"./data/geometry":3,"./util":6,"handlebars":"handlebars","lodash":"lodash"}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -553,8 +672,6 @@ var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj
 var _import = require('lodash');
 
 var _import2 = _interopRequireDefault(_import);
-
-var capitalCamelCase = _import2['default'].flowRight(_import2['default'].capitalize, _import2['default'].camelCase);
 
 function getFactoryValue(el) {
   return el.dataset.factory;
@@ -571,7 +688,7 @@ function getLabelFromEventTarget(evt) {
 // A little method for extracting factory labels (classes) from events.
 // If the input is not an object, return it.
 var getLabel = function getLabel(evt) {
-  return capitalCamelCase(getLabelFromEventTarget(evt)) || evt;
+  return getLabelFromEventTarget(evt) || evt;
 };
 
 exports['default'] = {

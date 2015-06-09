@@ -142,6 +142,127 @@ export default {
       value: Math.PI * 2,
       max: 360
     }
+  ],
+
+  DodecahedronGeometry: [
+    {
+      name: 'radius',
+      max: 4
+    },
+    {
+      name: 'detail',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 4
+    }
+  ],
+
+  IcosahedronGeometry: [
+    {
+      name: 'radius',
+      max: 4
+    },
+    {
+      name: 'detail',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 4
+    }
+  ],
+
+  OctahedronGeometry: [
+    {
+      name: 'radius',
+      max: 4
+    },
+    {
+      name: 'detail',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 4
+    }
+  ],
+
+  PlaneGeometry: [
+    {
+      name: 'width'
+    },
+    {
+      name: 'height'
+    },
+    {
+      name: 'widthSegments',
+      step: 1,
+      min: 1
+    },
+    {
+      name: 'heightSegments',
+      step: 1,
+      min: 1
+    }
+  ],
+
+  PlaneBufferGeometry: [
+    {
+      name: 'width'
+    },
+    {
+      name: 'height'
+    },
+    {
+      name: 'widthSegments',
+      step: 1,
+      min: 1
+    },
+    {
+      name: 'heightSegments',
+      step: 1,
+      min: 1
+    }
+  ],
+
+  RingGeometry: [
+    {
+      name: 'innerRadius',
+      value: 1,
+      min: 0
+    },
+    {
+      name: 'outerRadius',
+      value: 50,
+      max: 50
+    },
+    {
+      name: 'thetaSegments',
+      value: 8,
+      step: 1,
+      min: 0,
+      max: 32
+    },
+    {
+      name: 'phiSegments',
+      value: 8,
+      step: 1,
+      min: 1
+    },
+    {
+      name: 'thetaStart',
+      value: 0,
+      step: 1,
+      min: 0
+    },
+    {
+      name: 'thetaLength',
+      value: Math.PI * 2,
+      max: Math.PI * 2
+    }
   ]
+
+  // ExtrudeGeometry
+  // LatheGeometry
+  // ParametricGeometry
 
 };

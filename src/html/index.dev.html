@@ -10,26 +10,18 @@
   
   <body>
 
-    <ul id="objects">
+    <ul id="objects"></ul>
 
-      <li>
-        <button data-factory="box-geometry" class="factory">Box</button>
-        <div class="panel"></div>
-      </li>
+    <script id="geometry-template" type="text/x-handlebars-template">
 
+      {{#each this}}
       <li>
-        <button data-factory="sphere-geometry" class="factory">Sphere</button>
+        <button data-factory="{{this}}" class="factory">{{this}}</button>
         <div class="panel"></div>
       </li>
-      <li>
-        <button data-factory="cylinder-geometry" class="factory">Cylinder</button>
-        <div class="panel"></div>
-      </li>
-      <li>
-        <button data-factory="circle-geometry" class="factory">Circle</button>
-        <div class="panel"></div>
-      </li>
-    </ul>
+      {{/each}}
+
+    </script>
 
     <script id="properties-template" type="text/x-handlebars-template">
 
