@@ -232,15 +232,15 @@ export default {
     },
     {
       name: 'outerRadius',
-      value: 50,
-      max: 50
+      value: 2,
+      max: 10
     },
     {
       name: 'thetaSegments',
-      value: 8,
+      value: 32,
       step: 1,
-      min: 0,
-      max: 32
+      min: 3,
+      max: 64
     },
     {
       name: 'phiSegments',
@@ -257,12 +257,89 @@ export default {
     {
       name: 'thetaLength',
       value: Math.PI * 2,
+      step: Math.PI / 64,
       max: Math.PI * 2
+    }
+  ],
+
+  TetrahedronGeometry: [
+    {
+      name: 'radius',
+      max: 4
+    },
+    {
+      name: 'detail',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 4
+    }
+  ],
+
+  TorusGeometry: [
+    {
+      name: 'radius',
+      value: 1.5
+    },
+    {
+      name: 'tube',
+      value: 0.5
+    },
+    {
+      name: 'radialSegments',
+      value: 16,
+      max: 64
+    },
+    {
+      name: 'tubularSegments',
+      value: 100,
+      max: 100
+    },
+    {
+      name: 'arc',
+      value: Math.PI * 2
+    }
+  ],
+
+  TorusKnotGeometry: [
+    {
+      name: 'radius',
+      value: 1.5
+    },
+    {
+      name: 'tube',
+      value: 0.5
+    },
+    {
+      name: 'radialSegments',
+      value: 16,
+      step: 1,
+      min: 1,
+      max: 64
+    },
+    {
+      name: 'tubularSegments',
+      value: 64,
+      max: 128
+    },
+    {
+      name: 'p',
+      value: 2
+    },
+    {
+      name: 'q',
+      value: 3
+    },
+    {
+      name: 'heightScale',
+      value: 1
     }
   ]
 
   // ExtrudeGeometry
   // LatheGeometry
   // ParametricGeometry
+  // TextGeometry
+  // TubeGeometry
 
 };

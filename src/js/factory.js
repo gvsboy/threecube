@@ -18,7 +18,7 @@ function generateInstance(label, args) {
 }
 
 // Basic mesh material.
-var mesh = new THREE.MeshLambertMaterial({color: 0x00ff00});
+var mesh = new THREE.MeshLambertMaterial({color: '#00ff00'});
 
 var createObjectByLabel = (label) => {
   var instance = generateInstance(label, Data.getArgs(label));
