@@ -1,13 +1,17 @@
 import _ from 'lodash';
+import Util from './util';
 import GeometryData from './data/geometry';
 
 // Default values for some data object keys.
 // Maybe this should be in geometry data...
 var defaults = {
-  value: 1,
-  step: 0.1,
-  min: 0.1,
-  max: 10
+  args: {
+    value: 1,
+    step: 0.1,
+    min: 0.1,
+    max: 10
+  },
+  color: '#00ff00'
 };
 
 // Nerd alert.
@@ -20,8 +24,11 @@ var map = _(_.map).rearg([1, 0]).curry(2).value();
  * @param {String} label The key to clone.
  * @return {Object} The freshly-cloned data.
  */
-var cloneBaseDataByLabel = _.curry((data, label) => _.cloneDeep(data[label]));
+var cloneBaseDataByLabel = _.curry((data, label) => {
+  return _.cloneDeep(data[label]);
+});
 
+window._ = _;
 /**
  * Merges nodes in a data map with provided defaults.
  * @param {Object} defaults A shallow map of default values to merge.
@@ -29,9 +36,16 @@ var cloneBaseDataByLabel = _.curry((data, label) => _.cloneDeep(data[label]));
  * @return {Object} The decorated data.
  */
 var decorateDataWithDefaults = _.curry((defaults, data) => {
-  return _.map(data, arg => {
-    return _.defaults(arg, defaults);
+
+  // Loose properties.
+  _.defaults(data, defaults);
+
+  // Set arg defauts.
+  _.map(data.args, value => {
+    _.defaults(value, defaults.args);
   });
+
+  return data;
 });
 
 /**
@@ -42,12 +56,6 @@ var decorateDataWithDefaults = _.curry((defaults, data) => {
  */
 var getDefault = _.flowRight(decorateDataWithDefaults(defaults), cloneBaseDataByLabel(GeometryData));
 
-var getParameterByNameOrDefault = _.curry((defaults, name, param) => {
-  return _.isUndefined(param[name]) ? defaults[name] : param[name];
-});
-
-var getValueParameter = getParameterByNameOrDefault(defaults, 'value');
-
 var cache = {};
 var get = (cache, label) => cache[label];
 var set = (cache, label, data) => {
@@ -55,7 +63,7 @@ var set = (cache, label, data) => {
   return data;
 };
 var update = (cache, label, key, value) => {
-  _.find(cache[label], {name: key}).value = value;
+  _.find(cache[label].args, {name: key}).value = value;
   return cache[label];
 };
 
@@ -63,7 +71,13 @@ var getCache = _.partial(get, cache);
 var setCache = _.partial(set, cache);
 var updateCache = _.partial(update, cache);
 
-var setDefault = label => setCache(label, getDefault(label));
+var setDefault = label => {
+  return setCache(label, getDefault(label));
+};
+
+var getArgumentValues = data => _.pluck(data, 'value');
+
+var prop = _.curry((key, object) => object[key]);
 
 /**
  * Retrieves data by label or sets the default data for the label
@@ -78,11 +92,17 @@ var getOrGetAndSetDefault = label => getCache(label) || setDefault(label);
  * @param {String} label The object label to retrieve default args for.
  * @return {Array} The ordered collection of values.
  */
-var getArgumentList = _.flowRight(map(getValueParameter), getOrGetAndSetDefault);
+var getArgumentList = _.flowRight(getArgumentValues, prop('args'), getOrGetAndSetDefault);
+
+// Hacky
+var updateColor = (label, color) => {
+  cache[label].color = color;
+};
 
 export default {
   get: getOrGetAndSetDefault,
   getArgs: getArgumentList,
   update: updateCache,
-  reset: setDefault
+  reset: setDefault,
+  updateColor
 }

@@ -28,12 +28,6 @@ var _Util = require('./util');
 
 var _Util2 = _interopRequireDefault(_Util);
 
-// Troubleshooting.
-var trace = _import2['default'].curry(function (tag, x) {
-  console.log(tag, x);
-  return x;
-});
-
 // Wrapping the scene object addition method.
 // But I guess this isn't pure because we're mutating the scene, right? Eh.
 var addObject = _import2['default'].curry(function (scene, object) {
@@ -161,6 +155,10 @@ var _import = require('lodash');
 
 var _import2 = _interopRequireDefault(_import);
 
+var _Util = require('./util');
+
+var _Util2 = _interopRequireDefault(_Util);
+
 var _GeometryData = require('./data/geometry');
 
 var _GeometryData2 = _interopRequireDefault(_GeometryData);
@@ -168,10 +166,13 @@ var _GeometryData2 = _interopRequireDefault(_GeometryData);
 // Default values for some data object keys.
 // Maybe this should be in geometry data...
 var defaults = {
-  value: 1,
-  step: 0.1,
-  min: 0.1,
-  max: 10
+  args: {
+    value: 1,
+    step: 0.1,
+    min: 0.1,
+    max: 10
+  },
+  color: '#00ff00'
 };
 
 // Nerd alert.
@@ -188,6 +189,7 @@ var cloneBaseDataByLabel = _import2['default'].curry(function (data, label) {
   return _import2['default'].cloneDeep(data[label]);
 });
 
+window._ = _import2['default'];
 /**
  * Merges nodes in a data map with provided defaults.
  * @param {Object} defaults A shallow map of default values to merge.
@@ -195,9 +197,16 @@ var cloneBaseDataByLabel = _import2['default'].curry(function (data, label) {
  * @return {Object} The decorated data.
  */
 var decorateDataWithDefaults = _import2['default'].curry(function (defaults, data) {
-  return _import2['default'].map(data, function (arg) {
-    return _import2['default'].defaults(arg, defaults);
+
+  // Loose properties.
+  _import2['default'].defaults(data, defaults);
+
+  // Set arg defauts.
+  _import2['default'].map(data.args, function (value) {
+    _import2['default'].defaults(value, defaults.args);
   });
+
+  return data;
 });
 
 /**
@@ -208,12 +217,6 @@ var decorateDataWithDefaults = _import2['default'].curry(function (defaults, dat
  */
 var getDefault = _import2['default'].flowRight(decorateDataWithDefaults(defaults), cloneBaseDataByLabel(_GeometryData2['default']));
 
-var getParameterByNameOrDefault = _import2['default'].curry(function (defaults, name, param) {
-  return _import2['default'].isUndefined(param[name]) ? defaults[name] : param[name];
-});
-
-var getValueParameter = getParameterByNameOrDefault(defaults, 'value');
-
 var cache = {};
 var get = function get(cache, label) {
   return cache[label];
@@ -223,7 +226,7 @@ var set = function set(cache, label, data) {
   return data;
 };
 var update = function update(cache, label, key, value) {
-  _import2['default'].find(cache[label], { name: key }).value = value;
+  _import2['default'].find(cache[label].args, { name: key }).value = value;
   return cache[label];
 };
 
@@ -234,6 +237,14 @@ var updateCache = _import2['default'].partial(update, cache);
 var setDefault = function setDefault(label) {
   return setCache(label, getDefault(label));
 };
+
+var getArgumentValues = function getArgumentValues(data) {
+  return _import2['default'].pluck(data, 'value');
+};
+
+var prop = _import2['default'].curry(function (key, object) {
+  return object[key];
+});
 
 /**
  * Retrieves data by label or sets the default data for the label
@@ -250,17 +261,23 @@ var getOrGetAndSetDefault = function getOrGetAndSetDefault(label) {
  * @param {String} label The object label to retrieve default args for.
  * @return {Array} The ordered collection of values.
  */
-var getArgumentList = _import2['default'].flowRight(map(getValueParameter), getOrGetAndSetDefault);
+var getArgumentList = _import2['default'].flowRight(getArgumentValues, prop('args'), getOrGetAndSetDefault);
+
+// Hacky
+var updateColor = function updateColor(label, color) {
+  cache[label].color = color;
+};
 
 exports['default'] = {
   get: getOrGetAndSetDefault,
   getArgs: getArgumentList,
   update: updateCache,
-  reset: setDefault
+  reset: setDefault,
+  updateColor: updateColor
 };
 module.exports = exports['default'];
 
-},{"./data/geometry":3,"lodash":"lodash"}],3:[function(require,module,exports){
+},{"./data/geometry":3,"./util":6,"lodash":"lodash"}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -268,268 +285,294 @@ Object.defineProperty(exports, '__esModule', {
 });
 exports['default'] = {
 
-  BoxGeometry: [{
-    name: 'width' }, {
-    name: 'height'
-  }, {
-    name: 'depth'
-  }, {
-    name: 'widthSegments',
-    step: 1,
-    min: 1
-  }, {
-    name: 'heightSegments',
-    step: 1,
-    min: 1
-  }, {
-    name: 'depthSegments',
-    step: 1,
-    min: 1
-  }],
+  BoxGeometry: {
+    args: [{
+      name: 'width' }, {
+      name: 'height'
+    }, {
+      name: 'depth'
+    }, {
+      name: 'widthSegments',
+      step: 1,
+      min: 1
+    }, {
+      name: 'heightSegments',
+      step: 1,
+      min: 1
+    }, {
+      name: 'depthSegments',
+      step: 1,
+      min: 1
+    }]
+  },
 
-  SphereGeometry: [{
-    name: 'radius',
-    max: 4
-  }, {
-    name: 'widthSegments',
-    value: 32,
-    step: 1,
-    min: 1,
-    max: 64
-  }, {
-    name: 'heightSegments',
-    value: 32,
-    step: 1,
-    min: 1,
-    max: 64
-  }, {
-    name: 'phiStart',
-    value: 0,
-    step: 1,
-    min: 0,
-    max: 360
-  }, {
-    name: 'phiLength',
-    value: Math.PI * 2,
-    max: 360
-  }, {
-    name: 'thetaStart',
-    value: 0,
-    step: 1,
-    min: 0,
-    max: 360
-  }, {
-    name: 'thetaLength',
-    value: Math.PI * 2,
-    max: 360
-  }],
+  SphereGeometry: {
+    args: [{
+      name: 'radius',
+      max: 4
+    }, {
+      name: 'widthSegments',
+      value: 32,
+      step: 1,
+      min: 1,
+      max: 64
+    }, {
+      name: 'heightSegments',
+      value: 32,
+      step: 1,
+      min: 1,
+      max: 64
+    }, {
+      name: 'phiStart',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 360
+    }, {
+      name: 'phiLength',
+      value: Math.PI * 2,
+      max: 360
+    }, {
+      name: 'thetaStart',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 360
+    }, {
+      name: 'thetaLength',
+      value: Math.PI * 2,
+      max: 360
+    }]
+  },
 
-  CylinderGeometry: [{
-    name: 'radiusTop',
-    step: 1,
-    min: 1
-  }, {
-    name: 'radiusBottom',
-    step: 1,
-    min: 1
-  }, {
-    name: 'height',
-    value: 3
-  }, {
-    name: 'radiusSegments',
-    value: 32,
-    step: 1,
-    min: 1,
-    max: 64
-  }, {
-    name: 'heightSegments',
-    step: 1,
-    min: 1,
-    max: 64
-  }, {
-    name: 'openEnded',
-    value: false
-  }, {
-    name: 'thetaStart',
-    value: 0,
-    step: 1,
-    min: 0,
-    max: 360
-  }, {
-    name: 'thetaLength',
-    value: Math.PI * 2,
-    max: 360
-  }],
+  CylinderGeometry: {
+    args: [{
+      name: 'radiusTop',
+      step: 1,
+      min: 1
+    }, {
+      name: 'radiusBottom',
+      step: 1,
+      min: 1
+    }, {
+      name: 'height',
+      value: 3
+    }, {
+      name: 'radiusSegments',
+      value: 32,
+      step: 1,
+      min: 1,
+      max: 64
+    }, {
+      name: 'heightSegments',
+      step: 1,
+      min: 1,
+      max: 64
+    }, {
+      name: 'openEnded',
+      value: false
+    }, {
+      name: 'thetaStart',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 360
+    }, {
+      name: 'thetaLength',
+      value: Math.PI * 2,
+      max: 360
+    }]
+  },
 
-  CircleGeometry: [{
-    name: 'radius',
-    max: 4
-  }, {
-    name: 'segments',
-    value: 32,
-    step: 1,
-    min: 1,
-    max: 64
-  }, {
-    name: 'thetaStart',
-    value: 0,
-    step: 1,
-    min: 0,
-    max: 360
-  }, {
-    name: 'thetaLength',
-    value: Math.PI * 2,
-    max: 360
-  }],
+  CircleGeometry: {
+    args: [{
+      name: 'radius',
+      max: 4
+    }, {
+      name: 'segments',
+      value: 32,
+      step: 1,
+      min: 1,
+      max: 64
+    }, {
+      name: 'thetaStart',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 360
+    }, {
+      name: 'thetaLength',
+      value: Math.PI * 2,
+      max: 360
+    }]
+  },
 
-  DodecahedronGeometry: [{
-    name: 'radius',
-    max: 4
-  }, {
-    name: 'detail',
-    value: 0,
-    step: 1,
-    min: 0,
-    max: 4
-  }],
+  DodecahedronGeometry: {
+    args: [{
+      name: 'radius',
+      max: 4
+    }, {
+      name: 'detail',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 4
+    }]
+  },
 
-  IcosahedronGeometry: [{
-    name: 'radius',
-    max: 4
-  }, {
-    name: 'detail',
-    value: 0,
-    step: 1,
-    min: 0,
-    max: 4
-  }],
+  IcosahedronGeometry: {
+    args: [{
+      name: 'radius',
+      max: 4
+    }, {
+      name: 'detail',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 4
+    }]
+  },
 
-  OctahedronGeometry: [{
-    name: 'radius',
-    max: 4
-  }, {
-    name: 'detail',
-    value: 0,
-    step: 1,
-    min: 0,
-    max: 4
-  }],
+  OctahedronGeometry: {
+    args: [{
+      name: 'radius',
+      max: 4
+    }, {
+      name: 'detail',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 4
+    }]
+  },
 
-  PlaneGeometry: [{
-    name: 'width'
-  }, {
-    name: 'height'
-  }, {
-    name: 'widthSegments',
-    step: 1,
-    min: 1
-  }, {
-    name: 'heightSegments',
-    step: 1,
-    min: 1
-  }],
+  PlaneGeometry: {
+    args: [{
+      name: 'width'
+    }, {
+      name: 'height'
+    }, {
+      name: 'widthSegments',
+      step: 1,
+      min: 1
+    }, {
+      name: 'heightSegments',
+      step: 1,
+      min: 1
+    }]
+  },
 
-  PlaneBufferGeometry: [{
-    name: 'width'
-  }, {
-    name: 'height'
-  }, {
-    name: 'widthSegments',
-    step: 1,
-    min: 1
-  }, {
-    name: 'heightSegments',
-    step: 1,
-    min: 1
-  }],
+  PlaneBufferGeometry: {
+    args: [{
+      name: 'width'
+    }, {
+      name: 'height'
+    }, {
+      name: 'widthSegments',
+      step: 1,
+      min: 1
+    }, {
+      name: 'heightSegments',
+      step: 1,
+      min: 1
+    }]
+  },
 
-  RingGeometry: [{
-    name: 'innerRadius',
-    value: 1,
-    min: 0
-  }, {
-    name: 'outerRadius',
-    value: 2,
-    max: 10
-  }, {
-    name: 'thetaSegments',
-    value: 32,
-    step: 1,
-    min: 3,
-    max: 64
-  }, {
-    name: 'phiSegments',
-    value: 8,
-    step: 1,
-    min: 1
-  }, {
-    name: 'thetaStart',
-    value: 0,
-    step: 1,
-    min: 0
-  }, {
-    name: 'thetaLength',
-    value: Math.PI * 2,
-    step: Math.PI / 64,
-    max: Math.PI * 2
-  }],
+  RingGeometry: {
+    args: [{
+      name: 'innerRadius',
+      value: 1,
+      min: 0
+    }, {
+      name: 'outerRadius',
+      value: 2,
+      max: 10
+    }, {
+      name: 'thetaSegments',
+      value: 32,
+      step: 1,
+      min: 3,
+      max: 64
+    }, {
+      name: 'phiSegments',
+      value: 8,
+      step: 1,
+      min: 1
+    }, {
+      name: 'thetaStart',
+      value: 0,
+      step: 1,
+      min: 0
+    }, {
+      name: 'thetaLength',
+      value: Math.PI * 2,
+      step: Math.PI / 64,
+      max: Math.PI * 2
+    }]
+  },
 
-  TetrahedronGeometry: [{
-    name: 'radius',
-    max: 4
-  }, {
-    name: 'detail',
-    value: 0,
-    step: 1,
-    min: 0,
-    max: 4
-  }],
+  TetrahedronGeometry: {
+    args: [{
+      name: 'radius',
+      max: 4
+    }, {
+      name: 'detail',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 4
+    }]
+  },
 
-  TorusGeometry: [{
-    name: 'radius',
-    value: 1.5
-  }, {
-    name: 'tube',
-    value: 0.5
-  }, {
-    name: 'radialSegments',
-    value: 16,
-    max: 64
-  }, {
-    name: 'tubularSegments',
-    value: 100,
-    max: 100
-  }, {
-    name: 'arc',
-    value: Math.PI * 2
-  }],
+  TorusGeometry: {
+    args: [{
+      name: 'radius',
+      value: 1.5
+    }, {
+      name: 'tube',
+      value: 0.5
+    }, {
+      name: 'radialSegments',
+      value: 16,
+      max: 64
+    }, {
+      name: 'tubularSegments',
+      value: 100,
+      max: 100
+    }, {
+      name: 'arc',
+      value: Math.PI * 2
+    }]
+  },
 
-  TorusKnotGeometry: [{
-    name: 'radius',
-    value: 1.5
-  }, {
-    name: 'tube',
-    value: 0.5
-  }, {
-    name: 'radialSegments',
-    value: 16,
-    step: 1,
-    min: 1,
-    max: 64
-  }, {
-    name: 'tubularSegments',
-    value: 64,
-    max: 128
-  }, {
-    name: 'p',
-    value: 2
-  }, {
-    name: 'q',
-    value: 3
-  }, {
-    name: 'heightScale',
-    value: 1
-  }]
+  TorusKnotGeometry: {
+    args: [{
+      name: 'radius',
+      value: 1.5
+    }, {
+      name: 'tube',
+      value: 0.5
+    }, {
+      name: 'radialSegments',
+      value: 16,
+      step: 1,
+      min: 1,
+      max: 64
+    }, {
+      name: 'tubularSegments',
+      value: 64,
+      max: 128
+    }, {
+      name: 'p',
+      value: 2
+    }, {
+      name: 'q',
+      value: 3
+    }, {
+      name: 'heightScale',
+      value: 1
+    }]
+  }
 
   // ExtrudeGeometry
   // LatheGeometry
@@ -583,7 +626,7 @@ var mesh = new _THREE2['default'].MeshLambertMaterial({ color: '#00ff00' });
 var createObjectByLabel = function createObjectByLabel(label) {
   var instance = generateInstance(label, _Data2['default'].getArgs(label));
   if (instance) {
-    return new _THREE2['default'].Mesh(instance, mesh);
+    return new _THREE2['default'].Mesh(instance, new _THREE2['default'].MeshLambertMaterial({ color: _Data2['default'].get(label).color }));
   }
   return null;
 };
@@ -690,13 +733,15 @@ var handleClick = function handleClick(evt) {
 
 var handleInput = function handleInput(evt) {
 
-  var target = evt.target;
+  var target = evt.target,
+      label = _Util2['default'].getLabel(evt);
 
   if (target.id === 'input-color') {
-    console.log(target.value);
+    _Data2['default'].updateColor(label, target.value);
+  } else {
+    target.closest('li').querySelector('output').innerHTML = target.value;
+    _Data2['default'].update(label, target.name, target.value);
   }
-  target.closest('li').querySelector('output').innerHTML = target.value;
-  _Data2['default'].update(_Util2['default'].getLabel(evt), target.name, target.value);
   return evt;
 };
 
@@ -755,8 +800,15 @@ var getLabel = function getLabel(evt) {
   return getLabelFromEventTarget(evt) || evt;
 };
 
+// Troubleshooting.
+var trace = _import2['default'].curry(function (tag, x) {
+  console.log(tag, x);
+  return x;
+});
+
 exports['default'] = {
-  getLabel: getLabel
+  getLabel: getLabel,
+  trace: trace
 };
 module.exports = exports['default'];
 

@@ -72,13 +72,16 @@ var handleClick = evt => {
 
 var handleInput = evt => {
 
-  var target = evt.target;
+  var target = evt.target,
+      label = Util.getLabel(evt);
 
   if (target.id === 'input-color') {
-    console.log(target.value);
+    Data.updateColor(label, target.value);
   }
-  target.closest('li').querySelector('output').innerHTML = target.value;
-  Data.update(Util.getLabel(evt), target.name, target.value);
+  else {
+    target.closest('li').querySelector('output').innerHTML = target.value;
+    Data.update(label, target.name, target.value);
+  }
   return evt;
 };
 

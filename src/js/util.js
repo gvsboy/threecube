@@ -18,6 +18,13 @@ var getLabel = evt => {
   return getLabelFromEventTarget(evt) || evt;
 };
 
+// Troubleshooting.
+var trace = _.curry((tag, x) => {
+  console.log(tag, x);
+  return x;
+});
+
 export default {
-  getLabel
+  getLabel,
+  trace
 };

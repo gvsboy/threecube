@@ -32,13 +32,13 @@
         <ul id="material">
           <li>
             <label for="input-color">Color</label>
-            <input id="input-color" type="color" value="#00ff00">
+            <input id="input-color" type="color" value="{{this.color}}">
           </li>
         </ul>
 
         {{!-- Arguments used in creating the geometry instance, in order --}}
         <ul id="geometry">
-          {{#each this}}
+          {{#each args}}
           <li>
             <label>{{name}}
               <input id="input-{{name}}" name="{{name}}" type="range" min="{{min}}" max="{{max}}" step="{{step}}" value="{{value}}">

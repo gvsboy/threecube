@@ -23,7 +23,7 @@ var mesh = new THREE.MeshLambertMaterial({color: '#00ff00'});
 var createObjectByLabel = (label) => {
   var instance = generateInstance(label, Data.getArgs(label));
   if (instance) {
-    return new THREE.Mesh(instance, mesh);
+    return new THREE.Mesh(instance, new THREE.MeshLambertMaterial({color: Data.get(label).color}));
   }
   return null;
 };

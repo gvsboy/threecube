@@ -9,12 +9,6 @@ import Factory from './factory';
 import Menu from './menu';
 import Util from './util';
 
-// Troubleshooting.
-var trace = _.curry((tag, x) => {
-  console.log(tag, x);
-  return x;
-});
-
 // Wrapping the scene object addition method.
 // But I guess this isn't pure because we're mutating the scene, right? Eh.
 var addObject = _.curry((scene, object) => {
