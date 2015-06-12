@@ -31,8 +31,17 @@
         {{!-- Inputs used for the material instance --}}
         <ul id="material">
           <li>
-            <label for="input-color">Color</label>
-            <input id="input-color" type="color" value="{{this.color}}">
+            <label>Color
+              <input id="input-color" type="color" value="{{this.color}}">
+            </label>
+          </li>
+          <li>
+            <label>Texture
+              <select id="select-texture">
+                <option>none</option>
+                <option>grass</option>
+              </select>
+            </label>
           </li>
         </ul>
 

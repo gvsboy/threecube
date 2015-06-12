@@ -17,14 +17,20 @@ function generateInstance(label, args) {
   return null;
 }
 
-// Basic mesh material.
-var mesh = new THREE.MeshLambertMaterial({color: '#00ff00'});
+var createObjectByLabel = label => {
 
-var createObjectByLabel = (label) => {
-  var instance = generateInstance(label, Data.getArgs(label));
-  if (instance) {
-    return new THREE.Mesh(instance, new THREE.MeshLambertMaterial({color: Data.get(label).color}));
+  var instance = generateInstance(label, Data.getArgs(label)),
+      data = Data.get(label);
+
+  if (data.texture) {
+    var texture = THREE.ImageUtils.loadTexture('img/' + data.texture + '.jpg');
+    console.log('loaded texture:', texture);
   }
+
+  if (instance) {
+    return new THREE.Mesh(instance, new THREE.MeshLambertMaterial({color: data.color}));
+  }
+
   return null;
 };
 

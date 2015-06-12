@@ -76,13 +76,25 @@ var handleInput = evt => {
       label = Util.getLabel(evt);
 
   if (target.id === 'input-color') {
-    Data.updateColor(label, target.value);
+    Data.updateProp(label, 'color', target.value);
   }
   else {
     target.closest('li').querySelector('output').innerHTML = target.value;
     Data.update(label, target.name, target.value);
   }
   return evt;
+};
+
+var handleChange = evt => {
+
+  var label = Util.getLabel(evt);
+
+  if (evt.target.id === 'select-texture') {
+    Data.updateProp(label, 'texture', evt.target.value);
+    return label;
+  }
+
+  return null;
 };
 
 var listenTo = _.curry((handlers, el, type, handler) => {
@@ -95,7 +107,8 @@ var listenTo = _.curry((handlers, el, type, handler) => {
 
 var handlers = {
   click: handleClick,
-  input: handleInput
+  input: handleInput,
+  change: handleChange
 };
 
 var generateMenu = () => {

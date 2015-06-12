@@ -113,20 +113,16 @@ var getMainObject = _import2['default'].partial(getObjectByName, scene, OBJECT_N
 // Removes the main object from the stage.
 var removeMainObject = _import2['default'].partial(removeObjectByName, scene, OBJECT_NAME);
 
-// Is there a way to invoke a function but "pass through" the argument
-// from the function before it to the function after it?
-_Menu2['default'].listenTo('click', function (evt) {
+var listener = function listener(evt) {
   if (evt) {
     removeMainObject();
     addAndNameObjectByLabel(evt);
   }
-});
+};
 
-_Menu2['default'].listenTo('input', function (evt) {
-  removeMainObject();
-  addAndNameObjectByLabel(evt);
-});
-
+_Menu2['default'].listenTo('click', listener);
+_Menu2['default'].listenTo('input', listener);
+_Menu2['default'].listenTo('change', listener);
 _Menu2['default'].generate();
 
 // Shed some light on the subject. Gotta integrate this with factory.js.
@@ -263,9 +259,8 @@ var getOrGetAndSetDefault = function getOrGetAndSetDefault(label) {
  */
 var getArgumentList = _import2['default'].flowRight(getArgumentValues, prop('args'), getOrGetAndSetDefault);
 
-// Hacky
-var updateColor = function updateColor(label, color) {
-  cache[label].color = color;
+var updateProp = function updateProp(label, prop, value) {
+  cache[label][prop] = value;
 };
 
 exports['default'] = {
@@ -273,7 +268,7 @@ exports['default'] = {
   getArgs: getArgumentList,
   update: updateCache,
   reset: setDefault,
-  updateColor: updateColor
+  updateProp: updateProp
 };
 module.exports = exports['default'];
 
@@ -620,14 +615,20 @@ function generateInstance(label, args) {
   return null;
 }
 
-// Basic mesh material.
-var mesh = new _THREE2['default'].MeshLambertMaterial({ color: '#00ff00' });
-
 var createObjectByLabel = function createObjectByLabel(label) {
-  var instance = generateInstance(label, _Data2['default'].getArgs(label));
-  if (instance) {
-    return new _THREE2['default'].Mesh(instance, new _THREE2['default'].MeshLambertMaterial({ color: _Data2['default'].get(label).color }));
+
+  var instance = generateInstance(label, _Data2['default'].getArgs(label)),
+      data = _Data2['default'].get(label);
+
+  if (data.texture) {
+    var texture = _THREE2['default'].ImageUtils.loadTexture('img/' + data.texture + '.jpg');
+    console.log('loaded texture:', texture);
   }
+
+  if (instance) {
+    return new _THREE2['default'].Mesh(instance, new _THREE2['default'].MeshLambertMaterial({ color: data.color }));
+  }
+
   return null;
 };
 
@@ -737,12 +738,24 @@ var handleInput = function handleInput(evt) {
       label = _Util2['default'].getLabel(evt);
 
   if (target.id === 'input-color') {
-    _Data2['default'].updateColor(label, target.value);
+    _Data2['default'].updateProp(label, 'color', target.value);
   } else {
     target.closest('li').querySelector('output').innerHTML = target.value;
     _Data2['default'].update(label, target.name, target.value);
   }
   return evt;
+};
+
+var handleChange = function handleChange(evt) {
+
+  var label = _Util2['default'].getLabel(evt);
+
+  if (evt.target.id === 'select-texture') {
+    _Data2['default'].updateProp(label, 'texture', evt.target.value);
+    return label;
+  }
+
+  return null;
 };
 
 var listenTo = _import2['default'].curry(function (handlers, el, type, handler) {
@@ -755,7 +768,8 @@ var listenTo = _import2['default'].curry(function (handlers, el, type, handler) 
 
 var handlers = {
   click: handleClick,
-  input: handleInput
+  input: handleInput,
+  change: handleChange
 };
 
 var generateMenu = function generateMenu() {

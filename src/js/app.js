@@ -98,21 +98,16 @@ var getMainObject = _.partial(getObjectByName, scene, OBJECT_NAME);
 // Removes the main object from the stage.
 var removeMainObject = _.partial(removeObjectByName, scene, OBJECT_NAME);
 
-
-// Is there a way to invoke a function but "pass through" the argument
-// from the function before it to the function after it?
-Menu.listenTo('click', evt => {
+var listener = evt => {
   if (evt) {
     removeMainObject();
     addAndNameObjectByLabel(evt);
   }
-});
+};
 
-Menu.listenTo('input', evt => {
-  removeMainObject();
-  addAndNameObjectByLabel(evt);
-});
-
+Menu.listenTo('click', listener);
+Menu.listenTo('input', listener);
+Menu.listenTo('change', listener);
 Menu.generate();
 
 // Shed some light on the subject. Gotta integrate this with factory.js.

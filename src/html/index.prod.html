@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8">
     <title>ThreeCube</title>
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="main.min.css">
   </head>
   
   <body>
@@ -31,17 +31,8 @@
         {{!-- Inputs used for the material instance --}}
         <ul id="material">
           <li>
-            <label>Color
-              <input id="input-color" type="color" value="{{this.color}}">
-            </label>
-          </li>
-          <li>
-            <label>Texture
-              <select id="select-texture">
-                <option>none</option>
-                <option>grass</option>
-              </select>
-            </label>
+            <label for="input-color">Color</label>
+            <input id="input-color" type="color" value="{{this.color}}">
           </li>
         </ul>
 
@@ -61,10 +52,8 @@
 
     </script>
     
-    <script src="libs.js"></script>
-    <script src="main.js"></script>
-
-    <script src="http://localhost:35729/livereload.js"></script>
+    <script src="libs.min.js"></script>
+    <script src="main.min.js"></script>
   </body>
 
 </html>

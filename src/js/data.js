@@ -94,9 +94,8 @@ var getOrGetAndSetDefault = label => getCache(label) || setDefault(label);
  */
 var getArgumentList = _.flowRight(getArgumentValues, prop('args'), getOrGetAndSetDefault);
 
-// Hacky
-var updateColor = (label, color) => {
-  cache[label].color = color;
+var updateProp = (label, prop, value) => {
+  cache[label][prop] = value;
 };
 
 export default {
@@ -104,5 +103,5 @@ export default {
   getArgs: getArgumentList,
   update: updateCache,
   reset: setDefault,
-  updateColor
+  updateProp
 }
