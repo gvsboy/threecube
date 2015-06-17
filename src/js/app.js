@@ -75,10 +75,16 @@ var WIDTH = window.innerWidth,
     renderer = new THREE.WebGLRenderer();
 
 // Some more crap:
-camera.position.z = 5;
+camera.position.z = 100;
 renderer.setSize(WIDTH, HEIGHT);
 document.body.appendChild(renderer.domElement);
 
+document.getElementById('camera').addEventListener('mousedown', function(evt) {
+  var zoom = evt.target.dataset.zoom;
+  if (zoom) {
+    camera.position.z += parseInt(zoom, 10);
+  }
+});
 
 
 // OK LET'S HAVE FUN.

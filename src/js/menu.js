@@ -80,7 +80,7 @@ var handleInput = evt => {
   }
   else {
     target.closest('li').querySelector('output').innerHTML = target.value;
-    Data.update(label, target.name, target.value);
+    Data.update(label, target.name, +target.value);
   }
   return evt;
 };

@@ -25,10 +25,23 @@ var createObjectByLabel = label => {
   if (data.texture) {
     var texture = THREE.ImageUtils.loadTexture('img/' + data.texture + '.jpg');
     console.log('loaded texture:', texture);
+
+    //texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    //texture.anisotropy = 16;
+
+    var imageMaterial = new THREE.MeshPhongMaterial({
+      alphaTest: 0.5,
+      color: 0xffffff,
+      specular: 0x030303,
+      emissive: 0x111111,
+      shiness: 10,
+      map: texture,
+      side: THREE.DoubleSide
+    });
   }
 
   if (instance) {
-    return new THREE.Mesh(instance, new THREE.MeshLambertMaterial({color: data.color}));
+    return new THREE.Mesh(instance, imageMaterial || new THREE.MeshLambertMaterial({color: data.color}));
   }
 
   return null;

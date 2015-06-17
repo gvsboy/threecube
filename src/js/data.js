@@ -6,10 +6,10 @@ import GeometryData from './data/geometry';
 // Maybe this should be in geometry data...
 var defaults = {
   args: {
-    value: 1,
+    value: 30,
     step: 0.1,
     min: 0.1,
-    max: 10
+    max: 100
   },
   color: '#00ff00'
 };

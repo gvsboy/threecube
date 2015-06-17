@@ -92,9 +92,16 @@ scene = new _THREE2['default'].Scene(),
     renderer = new _THREE2['default'].WebGLRenderer();
 
 // Some more crap:
-camera.position.z = 5;
+camera.position.z = 100;
 renderer.setSize(WIDTH, HEIGHT);
 document.body.appendChild(renderer.domElement);
+
+document.getElementById('camera').addEventListener('mousedown', function (evt) {
+  var zoom = evt.target.dataset.zoom;
+  if (zoom) {
+    camera.position.z += parseInt(zoom, 10);
+  }
+});
 
 // OK LET'S HAVE FUN.
 
@@ -163,10 +170,10 @@ var _GeometryData2 = _interopRequireDefault(_GeometryData);
 // Maybe this should be in geometry data...
 var defaults = {
   args: {
-    value: 1,
+    value: 30,
     step: 0.1,
     min: 0.1,
-    max: 10
+    max: 100
   },
   color: '#00ff00'
 };
@@ -282,20 +289,24 @@ exports['default'] = {
 
   BoxGeometry: {
     args: [{
-      name: 'width' }, {
+      name: 'width'
+    }, {
       name: 'height'
     }, {
       name: 'depth'
     }, {
       name: 'widthSegments',
+      value: 1,
       step: 1,
       min: 1
     }, {
       name: 'heightSegments',
+      value: 1,
       step: 1,
       min: 1
     }, {
       name: 'depthSegments',
+      value: 1,
       step: 1,
       min: 1
     }]
@@ -303,8 +314,7 @@ exports['default'] = {
 
   SphereGeometry: {
     args: [{
-      name: 'radius',
-      max: 4
+      name: 'radius'
     }, {
       name: 'widthSegments',
       value: 32,
@@ -313,7 +323,7 @@ exports['default'] = {
       max: 64
     }, {
       name: 'heightSegments',
-      value: 32,
+      value: 16,
       step: 1,
       min: 1,
       max: 64
@@ -335,7 +345,7 @@ exports['default'] = {
       max: 360
     }, {
       name: 'thetaLength',
-      value: Math.PI * 2,
+      value: Math.PI,
       max: 360
     }]
   },
@@ -343,15 +353,16 @@ exports['default'] = {
   CylinderGeometry: {
     args: [{
       name: 'radiusTop',
-      step: 1,
-      min: 1
+      value: 30,
+      max: 100
     }, {
       name: 'radiusBottom',
-      step: 1,
-      min: 1
+      value: 30,
+      max: 100
     }, {
       name: 'height',
-      value: 3
+      value: 100,
+      max: 200
     }, {
       name: 'radiusSegments',
       value: 32,
@@ -381,8 +392,7 @@ exports['default'] = {
 
   CircleGeometry: {
     args: [{
-      name: 'radius',
-      max: 4
+      name: 'radius'
     }, {
       name: 'segments',
       value: 32,
@@ -404,8 +414,7 @@ exports['default'] = {
 
   DodecahedronGeometry: {
     args: [{
-      name: 'radius',
-      max: 4
+      name: 'radius'
     }, {
       name: 'detail',
       value: 0,
@@ -417,8 +426,7 @@ exports['default'] = {
 
   IcosahedronGeometry: {
     args: [{
-      name: 'radius',
-      max: 4
+      name: 'radius'
     }, {
       name: 'detail',
       value: 0,
@@ -430,8 +438,7 @@ exports['default'] = {
 
   OctahedronGeometry: {
     args: [{
-      name: 'radius',
-      max: 4
+      name: 'radius'
     }, {
       name: 'detail',
       value: 0,
@@ -448,12 +455,16 @@ exports['default'] = {
       name: 'height'
     }, {
       name: 'widthSegments',
+      value: 1,
       step: 1,
-      min: 1
+      min: 1,
+      max: 64
     }, {
       name: 'heightSegments',
+      value: 1,
       step: 1,
-      min: 1
+      min: 1,
+      max: 64
     }]
   },
 
@@ -464,24 +475,30 @@ exports['default'] = {
       name: 'height'
     }, {
       name: 'widthSegments',
+      value: 1,
       step: 1,
-      min: 1
+      min: 1,
+      max: 64
     }, {
       name: 'heightSegments',
+      value: 1,
       step: 1,
-      min: 1
+      min: 1,
+      max: 64
     }]
   },
 
   RingGeometry: {
     args: [{
       name: 'innerRadius',
-      value: 1,
+      value: 20,
+      step: 1,
       min: 0
     }, {
       name: 'outerRadius',
-      value: 2,
-      max: 10
+      value: 30,
+      step: 1,
+      min: 0
     }, {
       name: 'thetaSegments',
       value: 32,
@@ -508,8 +525,7 @@ exports['default'] = {
 
   TetrahedronGeometry: {
     args: [{
-      name: 'radius',
-      max: 4
+      name: 'radius'
     }, {
       name: 'detail',
       value: 0,
@@ -521,18 +537,21 @@ exports['default'] = {
 
   TorusGeometry: {
     args: [{
-      name: 'radius',
-      value: 1.5
+      name: 'radius'
     }, {
       name: 'tube',
-      value: 0.5
+      value: 10
     }, {
       name: 'radialSegments',
       value: 16,
+      step: 1,
+      min: 1,
       max: 64
     }, {
       name: 'tubularSegments',
-      value: 100,
+      value: 7,
+      step: 1,
+      min: 1,
       max: 100
     }, {
       name: 'arc',
@@ -542,11 +561,10 @@ exports['default'] = {
 
   TorusKnotGeometry: {
     args: [{
-      name: 'radius',
-      value: 1.5
+      name: 'radius'
     }, {
       name: 'tube',
-      value: 0.5
+      value: 10
     }, {
       name: 'radialSegments',
       value: 16,
@@ -623,10 +641,23 @@ var createObjectByLabel = function createObjectByLabel(label) {
   if (data.texture) {
     var texture = _THREE2['default'].ImageUtils.loadTexture('img/' + data.texture + '.jpg');
     console.log('loaded texture:', texture);
+
+    //texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    //texture.anisotropy = 16;
+
+    var imageMaterial = new _THREE2['default'].MeshPhongMaterial({
+      alphaTest: 0.5,
+      color: 16777215,
+      specular: 197379,
+      emissive: 1118481,
+      shiness: 10,
+      map: texture,
+      side: _THREE2['default'].DoubleSide
+    });
   }
 
   if (instance) {
-    return new _THREE2['default'].Mesh(instance, new _THREE2['default'].MeshLambertMaterial({ color: data.color }));
+    return new _THREE2['default'].Mesh(instance, imageMaterial || new _THREE2['default'].MeshLambertMaterial({ color: data.color }));
   }
 
   return null;
@@ -741,7 +772,7 @@ var handleInput = function handleInput(evt) {
     _Data2['default'].updateProp(label, 'color', target.value);
   } else {
     target.closest('li').querySelector('output').innerHTML = target.value;
-    _Data2['default'].update(label, target.name, target.value);
+    _Data2['default'].update(label, target.name, +target.value);
   }
   return evt;
 };

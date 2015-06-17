@@ -12,6 +12,11 @@
 
     <ul id="objects"></ul>
 
+    <ul id="camera">
+      <li><button data-zoom="-1">+</button></li>
+      <li><button data-zoom="1">-</button></li>
+    </ul>
+
     <script id="geometry-template" type="text/x-handlebars-template">
 
       {{#each this}}
@@ -40,6 +45,7 @@
               <select id="select-texture">
                 <option>none</option>
                 <option>grass</option>
+                <option>fry</option>
               </select>
             </label>
           </li>

@@ -3,7 +3,7 @@ export default {
   BoxGeometry:  {
     args: [
       {
-        name: 'width',
+        name: 'width'
       },
       {
         name: 'height'
@@ -13,16 +13,19 @@ export default {
       },
       {
         name: 'widthSegments',
+        value: 1,
         step: 1,
         min: 1
       },
       {
         name: 'heightSegments',
+        value: 1,
         step: 1,
         min: 1
       },
       {
         name: 'depthSegments',
+        value: 1,
         step: 1,
         min: 1
       }
@@ -32,8 +35,7 @@ export default {
   SphereGeometry: {
     args: [
       {
-        name: 'radius',
-        max: 4
+        name: 'radius'
       },
       {
         name: 'widthSegments',
@@ -44,7 +46,7 @@ export default {
       },
       {
         name: 'heightSegments',
-        value: 32,
+        value: 16,
         step: 1,
         min: 1,
         max: 64
@@ -70,7 +72,7 @@ export default {
       },
       {
         name: 'thetaLength',
-        value: Math.PI * 2,
+        value: Math.PI,
         max: 360
       }
     ]
@@ -80,17 +82,18 @@ export default {
     args: [
       {
         name: 'radiusTop',
-        step: 1,
-        min: 1
+        value: 30,
+        max: 100
       },
       {
         name: 'radiusBottom',
-        step: 1,
-        min: 1
+        value: 30,
+        max: 100
       },
       {
         name: 'height',
-        value: 3
+        value: 100,
+        max: 200
       },
       {
         name: 'radiusSegments',
@@ -127,8 +130,7 @@ export default {
   CircleGeometry: {
     args: [
       {
-        name: 'radius',
-        max: 4
+        name: 'radius'
       },
       {
         name: 'segments',
@@ -155,8 +157,7 @@ export default {
   DodecahedronGeometry: {
     args: [
       {
-        name: 'radius',
-        max: 4
+        name: 'radius'
       },
       {
         name: 'detail',
@@ -171,8 +172,7 @@ export default {
   IcosahedronGeometry: {
     args: [
       {
-        name: 'radius',
-        max: 4
+        name: 'radius'
       },
       {
         name: 'detail',
@@ -187,8 +187,7 @@ export default {
   OctahedronGeometry: {
     args: [
       {
-        name: 'radius',
-        max: 4
+        name: 'radius'
       },
       {
         name: 'detail',
@@ -210,13 +209,17 @@ export default {
       },
       {
         name: 'widthSegments',
+        value: 1,
         step: 1,
-        min: 1
+        min: 1,
+        max: 64
       },
       {
         name: 'heightSegments',
+        value: 1,
         step: 1,
-        min: 1
+        min: 1,
+        max: 64
       }
     ]
   },
@@ -231,13 +234,17 @@ export default {
       },
       {
         name: 'widthSegments',
+        value: 1,
         step: 1,
-        min: 1
+        min: 1,
+        max: 64
       },
       {
         name: 'heightSegments',
+        value: 1,
         step: 1,
-        min: 1
+        min: 1,
+        max: 64
       }
     ]
   },
@@ -246,13 +253,15 @@ export default {
     args: [
       {
         name: 'innerRadius',
-        value: 1,
+        value: 20,
+        step: 1,
         min: 0
       },
       {
         name: 'outerRadius',
-        value: 2,
-        max: 10
+        value: 30,
+        step: 1,
+        min: 0
       },
       {
         name: 'thetaSegments',
@@ -285,8 +294,7 @@ export default {
   TetrahedronGeometry: {
     args: [
       {
-        name: 'radius',
-        max: 4
+        name: 'radius'
       },
       {
         name: 'detail',
@@ -301,21 +309,24 @@ export default {
   TorusGeometry: {
     args: [
       {
-        name: 'radius',
-        value: 1.5
+        name: 'radius'
       },
       {
         name: 'tube',
-        value: 0.5
+        value: 10
       },
       {
         name: 'radialSegments',
         value: 16,
+        step: 1,
+        min: 1,
         max: 64
       },
       {
         name: 'tubularSegments',
-        value: 100,
+        value: 7,
+        step: 1,
+        min: 1,
         max: 100
       },
       {
@@ -328,12 +339,11 @@ export default {
   TorusKnotGeometry: {
     args: [
       {
-        name: 'radius',
-        value: 1.5
+        name: 'radius'
       },
       {
         name: 'tube',
-        value: 0.5
+        value: 10
       },
       {
         name: 'radialSegments',

@@ -26,6 +26,11 @@ var DEV_DIR = 'dist/dev/',
       'handlebars'
     ];
 
+function copyImages(dest) {
+  gulp.src('src/img/**/*', {base: './src'})
+    .pipe(gulp.dest(dest));
+}
+
 gulp.task('dev-libs', function() {
 
   var b = browserify({debug: false});
@@ -100,6 +105,7 @@ gulp.task('dev', function() {
   compileJS();
   compileSASS();
   copyHTML();
+  copyImages(DEV_DIR);
 });
 
 gulp.task('prod-libs', function() {
@@ -151,6 +157,8 @@ gulp.task('prod', function() {
     .pipe(rename('index.html'))
     .pipe(minifyHTML())
     .pipe(gulp.dest(PROD_DIR));
+
+  copyImages(PROD_DIR);
 });
 
 /**
