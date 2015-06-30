@@ -12,6 +12,11 @@
 
     <ul id="objects"></ul>
 
+    <ul id="camera">
+      <li><button data-zoom="-5">+</button></li>
+      <li><button data-zoom="5">-</button></li>
+    </ul>
+
     <script id="geometry-template" type="text/x-handlebars-template">
 
       {{#each this}}
@@ -31,8 +36,20 @@
         {{!-- Inputs used for the material instance --}}
         <ul id="material">
           <li>
-            <label for="input-color">Color</label>
-            <input id="input-color" type="color" value="{{this.color}}">
+            <label>Color
+              <input id="input-color" type="color" value="{{this.color}}">
+            </label>
+          </li>
+          <li>
+            <label>Texture
+              <select id="select-texture">
+                <option>none</option>
+                <option>grass</option>
+                <option>fry</option>
+                <option>desert1</option>
+                <option>desert2</option>
+              </select>
+            </label>
           </li>
         </ul>
 
